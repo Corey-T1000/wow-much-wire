@@ -5,7 +5,7 @@ type StatusLevel = "ok" | "warn" | "error";
 interface DiagnosticsResponse {
   timestamp: string;
   env: {
-    DATABASE_URL: boolean;
+    POSTGRES_URL: boolean;
     BETTER_AUTH_SECRET: boolean;
     GOOGLE_CLIENT_ID: boolean;
     GOOGLE_CLIENT_SECRET: boolean;
@@ -29,7 +29,7 @@ interface DiagnosticsResponse {
 
 export async function GET(req: Request) {
   const env = {
-    DATABASE_URL: Boolean(process.env.DATABASE_URL),
+    POSTGRES_URL: Boolean(process.env.POSTGRES_URL),
     BETTER_AUTH_SECRET: Boolean(process.env.BETTER_AUTH_SECRET),
     GOOGLE_CLIENT_ID: Boolean(process.env.GOOGLE_CLIENT_ID),
     GOOGLE_CLIENT_SECRET: Boolean(process.env.GOOGLE_CLIENT_SECRET),
@@ -41,7 +41,7 @@ export async function GET(req: Request) {
   let dbConnected = false;
   let schemaApplied = false;
   let dbError: string | undefined;
-  if (env.DATABASE_URL) {
+  if (env.POSTGRES_URL) {
     try {
       const [{ db }, { sql }, schema] = await Promise.all([
         import("@/lib/db"),
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
   } else {
     dbConnected = false;
     schemaApplied = false;
-    dbError = "DATABASE_URL is not set";
+    dbError = "POSTGRES_URL is not set";
   }
 
   // Auth route check: we consider the route responding if it returns any HTTP response
@@ -95,7 +95,7 @@ export async function GET(req: Request) {
   const aiConfigured = env.OPENAI_API_KEY; // We avoid live-calling the AI provider here
 
   const overallStatus: StatusLevel = (() => {
-    if (!env.DATABASE_URL || !dbConnected || !schemaApplied) return "error";
+    if (!env.POSTGRES_URL || !dbConnected || !schemaApplied) return "error";
     if (!authConfigured) return "error";
     // AI is optional; warn if not configured
     if (!aiConfigured) return "warn";

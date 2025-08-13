@@ -63,7 +63,7 @@ export default function Home() {
                   configure:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                  <li>DATABASE_URL (PostgreSQL connection string)</li>
+                  <li>POSTGRES_URL (PostgreSQL connection string)</li>
                   <li>GOOGLE_CLIENT_ID (OAuth credentials)</li>
                   <li>GOOGLE_CLIENT_SECRET (OAuth credentials)</li>
                   <li>OPENAI_API_KEY (for AI functionality)</li>
@@ -86,22 +86,16 @@ export default function Home() {
               <div className="p-4 border rounded-lg">
                 <h4 className="font-medium mb-2">3. Try the features</h4>
                 <div className="space-y-2">
-                  {(loading || !isAuthReady) ? (
-                    <Button 
-                      size="sm" 
-                      className="w-full glow" 
-                      disabled={true}
-                    >
+                  {loading || !isAuthReady ? (
+                    <Button size="sm" className="w-full glow" disabled={true}>
                       View Dashboard
                     </Button>
                   ) : (
                     <Button asChild size="sm" className="w-full glow">
-                      <Link href="/dashboard">
-                        View Dashboard
-                      </Link>
+                      <Link href="/dashboard">View Dashboard</Link>
                     </Button>
                   )}
-                  {(loading || !isAiReady) ? (
+                  {loading || !isAiReady ? (
                     <Button
                       variant="outline"
                       size="sm"
@@ -117,9 +111,7 @@ export default function Home() {
                       size="sm"
                       className="w-full"
                     >
-                      <Link href="/chat">
-                        Try AI Chat
-                      </Link>
+                      <Link href="/chat">Try AI Chat</Link>
                     </Button>
                   )}
                 </div>
@@ -139,20 +131,18 @@ export default function Home() {
 
       <footer className="border-t py-8 text-center text-sm text-muted-foreground">
         <div className="container mx-auto px-4">
-          <p className="mb-2">
-            Boilerplate template by Leon van Zyl
-          </p>
+          <p className="mb-2">Boilerplate template by Leon van Zyl</p>
           <p>
             Visit{" "}
-            <a 
-              href="https://youtube.com/@leonvanzyl" 
-              target="_blank" 
+            <a
+              href="https://youtube.com/@leonvanzyl"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
               @leonvanzyl on YouTube
-            </a>
-            {" "}for tutorials on using this template
+            </a>{" "}
+            for tutorials on using this template
           </p>
         </div>
       </footer>

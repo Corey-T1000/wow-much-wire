@@ -51,7 +51,7 @@ Fill in your environment variables in the `.env` file:
 
 ```env
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/your_database_name"
+POSTGRES_URL="postgresql://username:password@localhost:5432/your_database_name"
 
 # Authentication - Better Auth
 BETTER_AUTH_SECRET="your-random-32-character-secret-key-here"
@@ -92,7 +92,7 @@ Your application will be available at [http://localhost:3000](http://localhost:3
 2. Navigate to the **Storage** tab
 3. Click **Create** → **Postgres**
 4. Choose your database name and region
-5. Copy the `DATABASE_URL` from the `.env.local` tab
+5. Copy the `POSTGRES_URL` from the `.env.local` tab
 6. Add it to your `.env` file
 
 ### Google OAuth Credentials
@@ -171,7 +171,7 @@ npm run db:reset     # Reset database (drop all tables)
 
 Ensure these are set in your production environment:
 
-- `DATABASE_URL` - Production PostgreSQL connection string
+- `POSTGRES_URL` - Production PostgreSQL connection string
 - `BETTER_AUTH_SECRET` - Secure random 32+ character string
 - `GOOGLE_CLIENT_ID` - Google OAuth Client ID
 - `GOOGLE_CLIENT_SECRET` - Google OAuth Client Secret

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 type DiagnosticsResponse = {
   timestamp: string;
   env: {
-    DATABASE_URL: boolean;
+    POSTGRES_URL: boolean;
     BETTER_AUTH_SECRET: boolean;
     GOOGLE_CLIENT_ID: boolean;
     GOOGLE_CLIENT_SECRET: boolean;
@@ -69,12 +69,12 @@ export function SetupChecklist() {
       key: "env",
       label: "Environment variables",
       ok:
-        !!data?.env.DATABASE_URL &&
+        !!data?.env.POSTGRES_URL &&
         !!data?.env.BETTER_AUTH_SECRET &&
         !!data?.env.GOOGLE_CLIENT_ID &&
         !!data?.env.GOOGLE_CLIENT_SECRET,
       detail:
-        "Requires DATABASE_URL, BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET",
+        "Requires POSTGRES_URL, BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET",
     },
     {
       key: "db",

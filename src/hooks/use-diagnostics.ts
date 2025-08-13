@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 type DiagnosticsResponse = {
   timestamp: string;
   env: {
-    DATABASE_URL: boolean;
+    POSTGRES_URL: boolean;
     BETTER_AUTH_SECRET: boolean;
     GOOGLE_CLIENT_ID: boolean;
     GOOGLE_CLIENT_SECRET: boolean;
@@ -51,7 +51,10 @@ export function useDiagnostics() {
     fetchDiagnostics();
   }, []);
 
-  const isAuthReady = data?.auth.configured && data?.database.connected && data?.database.schemaApplied;
+  const isAuthReady =
+    data?.auth.configured &&
+    data?.database.connected &&
+    data?.database.schemaApplied;
   const isAiReady = data?.ai.configured;
 
   return {
