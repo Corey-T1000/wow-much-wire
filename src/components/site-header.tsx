@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { UserProfile } from "@/components/auth/user-profile";
+import { ModeToggle } from "./ui/mode-toggle";
 
 export function SiteHeader() {
   return (
@@ -13,7 +14,10 @@ export function SiteHeader() {
             Next.js Boilerplate
           </Link>
         </h1>
-        <UserProfile />
+        <div className="flex items-center gap-4">
+          <UserProfile />
+          <ModeToggle />
+        </div>
       </div>
     </header>
   );
