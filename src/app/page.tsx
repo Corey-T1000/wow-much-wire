@@ -9,143 +9,123 @@ import { StarterPromptModal } from "@/components/starter-prompt-modal";
 export default function Home() {
   const { isAuthReady, isAiReady, loading } = useDiagnostics();
   return (
-    <div className="min-h-screen flex flex-col grain">
-      <main className="flex-1 container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight">
-              Welcome to Your Next.js Boilerplate
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              A complete starter kit with authentication, database, AI
-              integration, and modern tooling
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-            <div className="p-6 border rounded-lg">
-              <h3 className="font-semibold mb-2">🔐 Authentication</h3>
-              <p className="text-sm text-muted-foreground">
-                Better Auth with Google OAuth integration
-              </p>
-            </div>
-            <div className="p-6 border rounded-lg">
-              <h3 className="font-semibold mb-2">🗄️ Database</h3>
-              <p className="text-sm text-muted-foreground">
-                Drizzle ORM with PostgreSQL setup
-              </p>
-            </div>
-            <div className="p-6 border rounded-lg">
-              <h3 className="font-semibold mb-2">🤖 AI Ready</h3>
-              <p className="text-sm text-muted-foreground">
-                Vercel AI SDK with OpenAI integration
-              </p>
-            </div>
-            <div className="p-6 border rounded-lg">
-              <h3 className="font-semibold mb-2">🎨 UI Components</h3>
-              <p className="text-sm text-muted-foreground">
-                shadcn/ui with Tailwind CSS
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-6 mt-12">
-            <SetupChecklist />
-
-            <h3 className="text-2xl font-semibold">Next Steps</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">
-                  1. Set up environment variables
-                </h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Copy <code>.env.example</code> to <code>.env.local</code> and
-                  configure:
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                  <li>POSTGRES_URL (PostgreSQL connection string)</li>
-                  <li>GOOGLE_CLIENT_ID (OAuth credentials)</li>
-                  <li>GOOGLE_CLIENT_SECRET (OAuth credentials)</li>
-                  <li>OPENAI_API_KEY (for AI functionality)</li>
-                </ul>
-              </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">2. Set up your database</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Run database migrations:
-                </p>
-                <div className="space-y-2">
-                  <code className="text-sm bg-muted p-2 rounded block">
-                    npm run db:generate
-                  </code>
-                  <code className="text-sm bg-muted p-2 rounded block">
-                    npm run db:migrate
-                  </code>
-                </div>
-              </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">3. Try the features</h4>
-                <div className="space-y-2">
-                  {loading || !isAuthReady ? (
-                    <Button size="sm" className="w-full glow" disabled={true}>
-                      View Dashboard
-                    </Button>
-                  ) : (
-                    <Button asChild size="sm" className="w-full glow">
-                      <Link href="/dashboard">View Dashboard</Link>
-                    </Button>
-                  )}
-                  {loading || !isAiReady ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      disabled={true}
-                    >
-                      Try AI Chat
-                    </Button>
-                  ) : (
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                    >
-                      <Link href="/chat">Try AI Chat</Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">4. Start building</h4>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Customize the components, add your own pages, and build your
-                  application on top of this solid foundation.
-                </p>
-                <StarterPromptModal />
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        <div className="container mx-auto px-4">
-          <p className="mb-2">Boilerplate template by Leon van Zyl</p>
-          <p>
-            Visit{" "}
-            <a
-              href="https://youtube.com/@leonvanzyl"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              @leonvanzyl on YouTube
-            </a>{" "}
-            for tutorials on using this template
+    <main className="flex-1 container mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto text-center space-y-8">
+        <div className="space-y-4">
+          <h2 className="text-4xl font-bold tracking-tight">
+            Welcome to Your Next.js Boilerplate
+          </h2>
+          <p className="text-xl text-muted-foreground">
+            A complete starter kit with authentication, database, AI
+            integration, and modern tooling
           </p>
         </div>
-      </footer>
-    </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+          <div className="p-6 border rounded-lg">
+            <h3 className="font-semibold mb-2">🔐 Authentication</h3>
+            <p className="text-sm text-muted-foreground">
+              Better Auth with Google OAuth integration
+            </p>
+          </div>
+          <div className="p-6 border rounded-lg">
+            <h3 className="font-semibold mb-2">🗄️ Database</h3>
+            <p className="text-sm text-muted-foreground">
+              Drizzle ORM with PostgreSQL setup
+            </p>
+          </div>
+          <div className="p-6 border rounded-lg">
+            <h3 className="font-semibold mb-2">🤖 AI Ready</h3>
+            <p className="text-sm text-muted-foreground">
+              Vercel AI SDK with OpenAI integration
+            </p>
+          </div>
+          <div className="p-6 border rounded-lg">
+            <h3 className="font-semibold mb-2">🎨 UI Components</h3>
+            <p className="text-sm text-muted-foreground">
+              shadcn/ui with Tailwind CSS
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6 mt-12">
+          <SetupChecklist />
+
+          <h3 className="text-2xl font-semibold">Next Steps</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2">
+                1. Set up environment variables
+              </h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                Copy <code>.env.example</code> to <code>.env.local</code> and
+                configure:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>POSTGRES_URL (PostgreSQL connection string)</li>
+                <li>GOOGLE_CLIENT_ID (OAuth credentials)</li>
+                <li>GOOGLE_CLIENT_SECRET (OAuth credentials)</li>
+                <li>OPENAI_API_KEY (for AI functionality)</li>
+              </ul>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2">2. Set up your database</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                Run database migrations:
+              </p>
+              <div className="space-y-2">
+                <code className="text-sm bg-muted p-2 rounded block">
+                  npm run db:generate
+                </code>
+                <code className="text-sm bg-muted p-2 rounded block">
+                  npm run db:migrate
+                </code>
+              </div>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2">3. Try the features</h4>
+              <div className="space-y-2">
+                {loading || !isAuthReady ? (
+                  <Button size="sm" className="w-full glow" disabled={true}>
+                    View Dashboard
+                  </Button>
+                ) : (
+                  <Button asChild size="sm" className="w-full glow">
+                    <Link href="/dashboard">View Dashboard</Link>
+                  </Button>
+                )}
+                {loading || !isAiReady ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={true}
+                  >
+                    Try AI Chat
+                  </Button>
+                ) : (
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  >
+                    <Link href="/chat">Try AI Chat</Link>
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2">4. Start building</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                Customize the components, add your own pages, and build your
+                application on top of this solid foundation.
+              </p>
+              <StarterPromptModal />
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

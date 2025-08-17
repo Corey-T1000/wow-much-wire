@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { UserProfile } from "@/components/auth/user-profile";
 import { ModeToggle } from "./ui/mode-toggle";
-import { GitHubStars } from "./ui/github-stars";
 
 export function SiteHeader() {
   return (
@@ -17,7 +16,6 @@ export function SiteHeader() {
         </h1>
         <div className="flex items-center gap-4">
           <UserProfile />
-          <GitHubStars repo="leonvanzyl/nextjs-better-auth-postgresql-starter-kit" />
           <ModeToggle />
         </div>
       </div>
