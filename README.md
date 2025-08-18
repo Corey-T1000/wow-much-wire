@@ -17,7 +17,7 @@ Watch the complete walkthrough of this agentic coding template:
 
 [![Agentic Coding Boilerplate Tutorial](https://img.youtube.com/vi/T0zFZsr_d0Q/maxresdefault.jpg)](https://youtu.be/T0zFZsr_d0Q)
 
-[🔗 Watch on YouTube](https://youtu.be/T0zFZsr_d0Q)
+<a href="https://youtu.be/T0zFZsr_d0Q" target="_blank" rel="noopener noreferrer">🔗 Watch on YouTube</a>
 
 ## 📋 Prerequisites
 
@@ -199,7 +199,7 @@ Ensure these are set in your production environment:
 
 Watch my comprehensive tutorial on how to use this agentic coding boilerplate to build AI-powered applications:
 
-[📺 YouTube Tutorial - Building with Agentic Coding Boilerplate](https://youtu.be/T0zFZsr_d0Q)
+<a href="https://youtu.be/T0zFZsr_d0Q" target="_blank" rel="noopener noreferrer">📺 YouTube Tutorial - Building with Agentic Coding Boilerplate</a>
 
 ## 🤝 Contributing
 
