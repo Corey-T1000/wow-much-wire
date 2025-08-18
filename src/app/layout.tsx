@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next.js Full-Stack Boilerplate",
+  title: "Agentic Coding Boilerplate",
   description:
-    "Complete Next.js starter template with authentication, database, AI integration, and modern tooling by Leon van Zyl",
+    "Complete agentic coding boilerplate with authentication, database, AI integration, and modern tooling - perfect for building AI-powered applications and autonomous agents by Leon van Zyl",
 };
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
-I'm working with a Next.js boilerplate project that includes authentication, database integration, and AI capabilities. Here's what's already set up:
+I'm working with an agentic coding boilerplate project that includes authentication, database integration, and AI capabilities. Here's what's already set up:
 
-## Current Boilerplate Structure
+## Current Agentic Coding Boilerplate Structure
 
 - **Authentication**: Better Auth with Google OAuth integration
 - **Database**: Drizzle ORM with PostgreSQL setup
@@ -13,7 +13,7 @@ I'm working with a Next.js boilerplate project that includes authentication, dat
 
 ## Important Context
 
-This is a **boilerplate/starter template** - all existing pages and components are meant to be examples and should be **completely replaced** to build the actual application.
+This is an **agentic coding boilerplate/starter template** - all existing pages and components are meant to be examples and should be **completely replaced** to build the actual AI-powered application.
 
 ### CRITICAL: You MUST Override All Boilerplate Content
 

@@ -11,7 +11,7 @@ export function SiteHeader() {
             href="/"
             className="bg-clip-text text-transparent [background-image:linear-gradient(90deg,color-mix(in_oklab,var(--primary)_85%,white_0%),color-mix(in_oklab,var(--primary)_50%,white_0%))] hover:opacity-90"
           >
-            Next.js Boilerplate
+            Agentic Coding Boilerplate
           </Link>
         </h1>
         <div className="flex items-center gap-4">

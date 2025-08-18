@@ -13,12 +13,31 @@ export default function Home() {
       <div className="max-w-4xl mx-auto text-center space-y-8">
         <div className="space-y-4">
           <h2 className="text-4xl font-bold tracking-tight">
-            Welcome to Your Next.js Boilerplate
+            Welcome to Your Agentic Coding Boilerplate
           </h2>
           <p className="text-xl text-muted-foreground">
-            A complete starter kit with authentication, database, AI
-            integration, and modern tooling
+            A complete agentic coding boilerplate with authentication, database, AI
+            integration, and modern tooling for building AI-powered applications
           </p>
+        </div>
+
+        {/* YouTube Tutorial Video */}
+        <div className="space-y-4">
+          <h3 className="text-2xl font-semibold">📺 Video Tutorial</h3>
+          <p className="text-muted-foreground">
+            Watch the complete walkthrough of this agentic coding boilerplate:
+          </p>
+          <div className="relative w-full max-w-3xl mx-auto">
+            <div className="relative pb-[56.25%] h-0 overflow-hidden rounded-lg border">
+              <iframe
+                className="absolute top-0 left-0 w-full h-full"
+                src="https://www.youtube.com/embed/T0zFZsr_d0Q"
+                title="Agentic Coding Boilerplate Tutorial"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">

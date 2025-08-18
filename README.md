@@ -1,6 +1,6 @@
-# Next.js Better Auth PostgreSQL Starter Kit
+# Agentic Coding Boilerplate
 
-A complete Next.js boilerplate with authentication, PostgreSQL database, AI chat functionality, and modern UI components - perfect for building your next SaaS application.
+A complete agentic coding boilerplate with authentication, PostgreSQL database, AI chat functionality, and modern UI components - perfect for building AI-powered applications and autonomous agents.
 
 ## 🚀 Features
 
@@ -11,12 +11,20 @@ A complete Next.js boilerplate with authentication, PostgreSQL database, AI chat
 - **⚡ Modern Stack**: Next.js 15, React 19, TypeScript
 - **📱 Responsive**: Mobile-first design approach
 
+## 🎥 Video Tutorial
+
+Watch the complete walkthrough of this agentic coding template:
+
+[![Agentic Coding Boilerplate Tutorial](https://img.youtube.com/vi/T0zFZsr_d0Q/maxresdefault.jpg)](https://youtu.be/T0zFZsr_d0Q)
+
+[🔗 Watch on YouTube](https://youtu.be/T0zFZsr_d0Q)
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed on your machine:
 
-- **Node.js**: Version 18.0 or higher ([Download here](https://nodejs.org/))
-- **Git**: For cloning the repository ([Download here](https://git-scm.com/))
+- **Node.js**: Version 18.0 or higher (<a href="https://nodejs.org/" target="_blank">Download here</a>)
+- **Git**: For cloning the repository (<a href="https://git-scm.com/" target="_blank">Download here</a>)
 - **PostgreSQL**: Either locally installed or access to a hosted service like Vercel Postgres
 
 ## 🛠️ Quick Setup
@@ -26,8 +34,8 @@ Before you begin, ensure you have the following installed on your machine:
 **Option A: Clone with Git**
 
 ```bash
-git clone https://github.com/your-username/nextjs-better-auth-postgresql-starter-kit.git
-cd nextjs-better-auth-postgresql-starter-kit
+git clone https://github.com/your-username/agentic-coding-boilerplate.git
+cd agentic-coding-boilerplate
 ```
 
 **Option B: Download ZIP**
@@ -70,10 +78,11 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 ### 4. Database Setup
 
-Push the database schema to your PostgreSQL database:
+Generate and run database migrations:
 
 ```bash
-npm run db:push
+npm run db:generate
+npm run db:migrate
 ```
 
 ### 5. Start the Development Server
@@ -88,7 +97,7 @@ Your application will be available at [http://localhost:3000](http://localhost:3
 
 ### PostgreSQL Database on Vercel
 
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+1. Go to <a href="https://vercel.com/dashboard" target="_blank">Vercel Dashboard</a>
 2. Navigate to the **Storage** tab
 3. Click **Create** → **Postgres**
 4. Choose your database name and region
@@ -97,19 +106,18 @@ Your application will be available at [http://localhost:3000](http://localhost:3
 
 ### Google OAuth Credentials
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+1. Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>
 2. Create a new project or select an existing one
-3. Enable the **Google+ API**
-4. Navigate to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
-5. Set application type to **Web application**
-6. Add authorized redirect URIs:
+3. Navigate to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
+4. Set application type to **Web application**
+5. Add authorized redirect URIs:
    - `http://localhost:3000/api/auth/callback/google` (development)
    - `https://yourdomain.com/api/auth/callback/google` (production)
-7. Copy the **Client ID** and **Client Secret** to your `.env` file
+6. Copy the **Client ID** and **Client Secret** to your `.env` file
 
 ### OpenAI API Key
 
-1. Go to [OpenAI Platform](https://platform.openai.com/dashboard)
+1. Go to <a href="https://platform.openai.com/dashboard" target="_blank">OpenAI Platform</a>
 2. Navigate to **API Keys** in the sidebar
 3. Click **Create new secret key**
 4. Give it a name and copy the key
@@ -162,10 +170,18 @@ npm run db:reset     # Reset database (drop all tables)
 
 ### Deploy to Vercel (Recommended)
 
-1. Push your code to GitHub
-2. Connect your repository to [Vercel](https://vercel.com)
-3. Add your environment variables in the Vercel dashboard
-4. Deploy automatically with each push to your main branch
+1. Install the Vercel CLI globally:
+   ```bash
+   npm install -g vercel
+   ```
+
+2. Deploy your application:
+   ```bash
+   vercel --prod
+   ```
+
+3. Follow the prompts to configure your deployment
+4. Add your environment variables when prompted or via the Vercel dashboard
 
 ### Production Environment Variables
 
@@ -181,11 +197,9 @@ Ensure these are set in your production environment:
 
 ## 🎥 Tutorial Video
 
-Watch my comprehensive tutorial on how to use this boilerplate to build amazing applications:
+Watch my comprehensive tutorial on how to use this agentic coding boilerplate to build AI-powered applications:
 
-[📺 YouTube Tutorial - Building with Next.js Better Auth PostgreSQL Starter Kit](#)
-
-_Coming soon - link will be updated with the actual video URL_
+[📺 YouTube Tutorial - Building with Agentic Coding Boilerplate](https://youtu.be/T0zFZsr_d0Q)
 
 ## 🤝 Contributing
 
@@ -203,7 +217,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues:
 
-1. Check the [Issues](https://github.com/your-username/nextjs-better-auth-postgresql-starter-kit/issues) section
+1. Check the [Issues](https://github.com/your-username/agentic-coding-boilerplate/issues) section
 2. Review the documentation above
 3. Create a new issue with detailed information about your problem
 

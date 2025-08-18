@@ -5,9 +5,9 @@ export function SiteFooter() {
     <footer className="border-t py-6 text-center text-sm text-muted-foreground">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center space-y-3">
-          <GitHubStars repo="leonvanzyl/nextjs-better-auth-postgresql-starter-kit" />
+          <GitHubStars repo="leonvanzyl/agentic-coding-boilerplate" />
           <p>
-            Built using Boilerplate Template by{" "}
+            Built using Agentic Coding Boilerplate by{" "}
             <a
               href="https://youtube.com/@leonvanzyl"
               target="_blank"
