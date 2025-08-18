@@ -19,6 +19,12 @@ Watch the complete walkthrough of this agentic coding template:
 
 <a href="https://youtu.be/T0zFZsr_d0Q" target="_blank" rel="noopener noreferrer">🔗 Watch on YouTube</a>
 
+## ☕ Support This Project
+
+If this boilerplate helped you build something awesome, consider buying me a coffee!
+
+[![Buy me a coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/leonvanzyl)
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed on your machine:
