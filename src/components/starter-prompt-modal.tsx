@@ -107,7 +107,9 @@ After completing the implementation, you MUST document any new features or signi
 
 3. **Document Design Decisions**: Include any important architectural or design decisions made during implementation.
 
-This documentation helps maintain the project and assists future developers working with the codebase.`;
+This documentation helps maintain the project and assists future developers working with the codebase.
+
+Think hard about the solution and implementing the user's requirements.`;
 
 export function StarterPromptModal() {
   const [isOpen, setIsOpen] = useState(false);
