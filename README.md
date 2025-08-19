@@ -40,8 +40,8 @@ Before you begin, ensure you have the following installed on your machine:
 **Option A: Clone with Git**
 
 ```bash
-git clone https://github.com/leonvanzyl/nextjs-better-auth-postgresql-starter-kit.git
-cd nextjs-better-auth-postgresql-starter-kit
+git clone https://github.com/leonvanzyl/agentic-coding-starter-kit.git
+cd agentic-coding-starter-kit
 ```
 
 **Option B: Download ZIP**
@@ -177,11 +177,13 @@ npm run db:reset     # Reset database (drop all tables)
 ### Deploy to Vercel (Recommended)
 
 1. Install the Vercel CLI globally:
+
    ```bash
    npm install -g vercel
    ```
 
 2. Deploy your application:
+
    ```bash
    vercel --prod
    ```
@@ -223,7 +225,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues:
 
-1. Check the [Issues](https://github.com/leonvanzyl/nextjs-better-auth-postgresql-starter-kit/issues) section
+1. Check the [Issues](https://github.com/leonvanzyl/agentic-coding-starter-kit/issues) section
 2. Review the documentation above
 3. Create a new issue with detailed information about your problem
 
