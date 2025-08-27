@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { UserProfile } from "@/components/auth/user-profile";
 import { ModeToggle } from "./ui/mode-toggle";
+import { Bot } from "lucide-react";
 
 export function SiteHeader() {
   return (
@@ -9,9 +10,14 @@ export function SiteHeader() {
         <h1 className="text-2xl font-bold">
           <Link
             href="/"
-            className="text-primary hover:text-primary/80 transition-colors"
+            className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
           >
-            Agentic Coding Boilerplate
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+              <Bot className="h-5 w-5" />
+            </div>
+            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Starter Kit
+            </span>
           </Link>
         </h1>
         <div className="flex items-center gap-4">

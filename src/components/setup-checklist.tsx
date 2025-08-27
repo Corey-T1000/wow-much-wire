@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 type DiagnosticsResponse = {
   timestamp: string;
@@ -30,13 +31,13 @@ type DiagnosticsResponse = {
 
 function StatusIcon({ ok }: { ok: boolean }) {
   return ok ? (
-    <span aria-label="ok" title="ok">
-      ✅
-    </span>
+    <div title="ok">
+      <CheckCircle2 className="h-4 w-4 text-green-600" aria-label="ok" />
+    </div>
   ) : (
-    <span aria-label="not-ok" title="not ok">
-      ❌
-    </span>
+    <div title="not ok">
+      <XCircle className="h-4 w-4 text-red-600" aria-label="not-ok" />
+    </div>
   );
 }
 

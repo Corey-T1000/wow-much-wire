@@ -63,11 +63,11 @@ The only things to preserve are:
 **IMPORTANT**: When implementing any AI functionality, always use the \`OPENAI_MODEL\` environment variable for the model name instead of hardcoding it:
 
 \`\`\`typescript
-// ✅ Correct - Use environment variable
+// ✓ Correct - Use environment variable
 const model = process.env.OPENAI_MODEL || "gpt-5-mini";
 model: openai(model)
 
-// ❌ Incorrect - Don't hardcode model names
+// ✗ Incorrect - Don't hardcode model names
 model: openai("gpt-5-mini")
 \`\`\`
 
@@ -89,7 +89,7 @@ The project already includes several shadcn/ui components (button, dialog, avata
 Please help me transform this boilerplate into my actual application. **You MUST completely replace all existing boilerplate code** to match my project requirements. The current implementation is just temporary scaffolding that should be entirely removed and replaced.
 
 ## Final Reminder: COMPLETE REPLACEMENT REQUIRED
-🚨 **IMPORTANT**: Do not preserve any of the existing boilerplate UI, components, or content. The user expects a completely fresh application that implements their requirements from scratch. Any remnants of the original boilerplate (like setup checklists, welcome screens, demo content, or placeholder navigation) indicate incomplete implementation.
+**⚠️ IMPORTANT**: Do not preserve any of the existing boilerplate UI, components, or content. The user expects a completely fresh application that implements their requirements from scratch. Any remnants of the original boilerplate (like setup checklists, welcome screens, demo content, or placeholder navigation) indicate incomplete implementation.
 
 **Success Criteria**: The final application should look and function as if it was built from scratch for the specific use case, with no evidence of the original boilerplate template.
 
