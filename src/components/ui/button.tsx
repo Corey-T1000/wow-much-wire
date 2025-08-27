@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "relative bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 hover:brightness-110 before:absolute before:inset-0 before:rounded-[inherit] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300 before:[box-shadow:0_0_1rem_color-mix(in_oklab,var(--primary)_40%,transparent),0_0_2.2rem_color-mix(in_oklab,var(--primary)_25%,transparent)]",
+          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:

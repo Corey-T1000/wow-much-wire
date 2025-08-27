@@ -105,11 +105,11 @@ export default function Home() {
               <h4 className="font-medium mb-2">3. Try the features</h4>
               <div className="space-y-2">
                 {loading || !isAuthReady ? (
-                  <Button size="sm" className="w-full glow" disabled={true}>
+                  <Button size="sm" className="w-full" disabled={true}>
                     View Dashboard
                   </Button>
                 ) : (
-                  <Button asChild size="sm" className="w-full glow">
+                  <Button asChild size="sm" className="w-full">
                     <Link href="/dashboard">View Dashboard</Link>
                   </Button>
                 )}

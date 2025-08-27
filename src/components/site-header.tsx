@@ -9,7 +9,7 @@ export function SiteHeader() {
         <h1 className="text-2xl font-bold">
           <Link
             href="/"
-            className="bg-clip-text text-transparent [background-image:linear-gradient(90deg,color-mix(in_oklab,var(--primary)_85%,white_0%),color-mix(in_oklab,var(--primary)_50%,white_0%))] hover:opacity-90"
+            className="text-primary hover:text-primary/80 transition-colors"
           >
             Agentic Coding Boilerplate
           </Link>

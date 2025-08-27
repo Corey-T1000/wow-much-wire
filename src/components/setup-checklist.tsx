@@ -114,12 +114,12 @@ export function SetupChecklist() {
             {completed}/{steps.length} completed
           </p>
         </div>
-        <Button size="sm" onClick={load} disabled={loading} className="glow">
+        <Button size="sm" onClick={load} disabled={loading}>
           {loading ? "Checking..." : "Re-check"}
         </Button>
       </div>
 
-      {error ? <div className="text-sm text-red-500">{error}</div> : null}
+      {error ? <div className="text-sm text-destructive">{error}</div> : null}
 
       <ul className="space-y-2">
         {steps.map((s) => (
