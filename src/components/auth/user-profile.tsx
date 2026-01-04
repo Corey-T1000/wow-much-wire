@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { User, LogOut } from "lucide-react";
@@ -16,11 +17,20 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { SignInButton } from "./sign-in-button";
 
 export function UserProfile() {
+  const [mounted, setMounted] = useState(false);
   const { data: session, isPending } = useSession();
   const router = useRouter();
 
-  if (isPending) {
-    return <div>Loading...</div>;
+  // Prevent hydration mismatch by waiting until mounted
+  // This is a standard pattern for client-only components - the setState triggers
+  // a single re-render after hydration which is intentional for this use case
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isPending) {
+    return <div className="h-8 w-8" />; // Placeholder with same dimensions as avatar
   }
 
   if (!session) {

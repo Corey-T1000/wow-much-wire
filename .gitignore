@@ -44,3 +44,9 @@ next-env.d.ts
 
 # uploads
 public/uploads
+
+# Database data (portable but not committed)
+/data
+
+# Claude Code working files
+.claude/diagram-snapshot.json

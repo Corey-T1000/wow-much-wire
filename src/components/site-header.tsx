@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bot } from "lucide-react";
+import { Zap } from "lucide-react";
 import { UserProfile } from "@/components/auth/user-profile";
 import { ModeToggle } from "./ui/mode-toggle";
 
@@ -22,19 +22,27 @@ export function SiteHeader() {
             <Link
               href="/"
               className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
-              aria-label="Starter Kit - Go to homepage"
+              aria-label="WireWise - Go to homepage"
             >
               <div
-                className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10"
+                className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/20"
                 aria-hidden="true"
               >
-                <Bot className="h-5 w-5" />
+                <Zap className="h-5 w-5 text-amber-500" />
               </div>
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                Starter Kit
+              <span className="bg-gradient-to-r from-amber-500 to-amber-400 bg-clip-text text-transparent">
+                WireWise
               </span>
             </Link>
           </h1>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/diagram"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Diagram Editor
+            </Link>
+          </div>
           <div className="flex items-center gap-4" role="group" aria-label="User actions">
             <UserProfile />
             <ModeToggle />

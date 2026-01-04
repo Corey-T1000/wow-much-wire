@@ -129,45 +129,52 @@ The project includes technical documentation in `docs/`:
 
 ### CRITICAL RULES
 
-1. **ALWAYS run lint and typecheck** after completing changes:
+1. **NEVER implement destructive operations without preserving user data**
+
+   - Reset/sync/delete operations must ALWAYS preserve user work (positions, customizations, preferences)
+   - Default to merge/sync patterns, not destructive overwrites
+   - Before implementing any "reset" feature, ASK: "What user data could this destroy?"
+   - When in doubt, ask the user before implementing
+
+2. **ALWAYS run lint and typecheck** after completing changes:
 
    ```bash
    npm run lint && npm run typecheck
    ```
 
-2. **NEVER start the dev server yourself**
+3. **NEVER start the dev server yourself**
 
    - If you need dev server output, ask the user to provide it
    - Don't run `npm run dev` or `pnpm dev`
 
-3. **Use OpenRouter, NOT OpenAI directly**
+4. **Use OpenRouter, NOT OpenAI directly**
 
    - Import from `@openrouter/ai-sdk-provider`
    - Use `openrouter()` function, not `openai()`
    - Model names follow OpenRouter format: `provider/model-name`
 
-4. **Styling Guidelines**
+5. **Styling Guidelines**
 
    - Stick to standard Tailwind CSS utility classes
    - Use shadcn/ui color tokens (e.g., `bg-background`, `text-foreground`)
    - Avoid custom colors unless explicitly requested
    - Support dark mode with appropriate Tailwind classes
 
-5. **Authentication**
+6. **Authentication**
 
    - Server-side: Import from `@/lib/auth` (Better Auth instance)
    - Client-side: Import hooks from `@/lib/auth-client`
    - Protected routes should check session in Server Components
    - Use existing auth components from `src/components/auth/`
 
-6. **Database Operations**
+7. **Database Operations**
 
    - Use Drizzle ORM (imported from `@/lib/db`)
    - Schema is defined in `@/lib/schema`
    - Always run migrations after schema changes
    - PostgreSQL is the database (not SQLite, MySQL, etc.)
 
-7. **File Storage**
+8. **File Storage**
 
    - Use the storage abstraction from `@/lib/storage`
    - Automatically uses local storage (dev) or Vercel Blob (production)
@@ -175,18 +182,18 @@ The project includes technical documentation in `docs/`:
    - Example: `const result = await upload(buffer, "avatar.png", "avatars")`
    - Storage switches based on `BLOB_READ_WRITE_TOKEN` environment variable
 
-8. **Component Creation**
+9. **Component Creation**
 
    - Use existing shadcn/ui components when possible
    - Follow the established patterns in `src/components/ui/`
    - Support both light and dark modes
    - Use TypeScript with proper types
 
-9. **API Routes**
-   - Follow Next.js 16 App Router conventions
-   - Use Route Handlers (route.ts files)
-   - Return Response objects
-   - Handle errors appropriately
+10. **API Routes**
+    - Follow Next.js 16 App Router conventions
+    - Use Route Handlers (route.ts files)
+    - Return Response objects
+    - Handle errors appropriately
 
 ### Best Practices
 

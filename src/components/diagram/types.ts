@@ -1,0 +1,125 @@
+/**
+ * Types for the wiring diagram visualization
+ */
+
+export interface DiagramPin {
+  id: string;
+  position: string;
+  label: string | null;
+  function: string | null;
+  wireGauge: string | null;
+  fuseRating: string | null;
+  isUsed: boolean;
+  circuitColor?: string;
+}
+
+export interface DiagramConnector {
+  id: string;
+  name: string;
+  type: string | null;
+  pinCount: number;
+  pinLayout: { rows: string[][] } | null;
+  pins: DiagramPin[];
+}
+
+export interface DiagramComponent {
+  id: string;
+  name: string;
+  type: ComponentType;
+  manufacturer: string | null;
+  partNumber: string | null;
+  notes: string | null;
+  connectors: DiagramConnector[];
+}
+
+export type ComponentType =
+  | "pdu"
+  | "ecu"
+  | "relay"
+  | "fuse"
+  | "light"
+  | "motor"
+  | "sensor"
+  | "switch"
+  | "ground"
+  | "power"
+  | "generic";
+
+export interface DiagramCircuit {
+  id: string;
+  name: string;
+  color: string;
+  category: string;
+}
+
+export interface DiagramWire {
+  id: string;
+  sourcePinId: string;
+  targetPinId: string;
+  color: string | null;
+  gauge: string | null;
+  circuitId: string | null;
+  isInstalled: boolean;
+}
+
+export interface DiagramPosition {
+  x: number;
+  y: number;
+}
+
+export interface DiagramData {
+  components: DiagramComponent[];
+  circuits: DiagramCircuit[];
+  wires: DiagramWire[];
+  /** Component positions on the canvas, keyed by component ID */
+  positions?: Record<string, DiagramPosition>;
+}
+
+// Node data types for React Flow
+// Using Record<string, unknown> compatible interface for React Flow
+export interface ComponentNodeData extends Record<string, unknown> {
+  component: DiagramComponent;
+  isSelected: boolean;
+  isDimmed?: boolean;
+  onPinClick?: ((pinId: string) => void) | undefined;
+}
+
+// Component type styling configuration
+// Light mode: white/near-white backgrounds with colored borders for distinction
+// Dark mode: deep saturated backgrounds for visibility on dark canvas
+export const COMPONENT_STYLES: Record<
+  ComponentType,
+  { bg: string; border: string; icon: string }
+> = {
+  pdu: { bg: "bg-white dark:bg-blue-950", border: "border-blue-500", icon: "⚡" },
+  ecu: { bg: "bg-white dark:bg-red-950", border: "border-red-500", icon: "🧠" },
+  relay: { bg: "bg-white dark:bg-amber-950", border: "border-amber-500", icon: "🔌" },
+  fuse: { bg: "bg-white dark:bg-yellow-950", border: "border-yellow-500", icon: "⚠️" },
+  light: { bg: "bg-white dark:bg-cyan-950", border: "border-cyan-500", icon: "💡" },
+  motor: { bg: "bg-white dark:bg-green-950", border: "border-green-500", icon: "⚙️" },
+  sensor: { bg: "bg-white dark:bg-purple-950", border: "border-purple-500", icon: "📡" },
+  switch: { bg: "bg-white dark:bg-orange-950", border: "border-orange-500", icon: "🎚️" },
+  ground: { bg: "bg-white dark:bg-neutral-900", border: "border-neutral-500", icon: "⏚" },
+  power: { bg: "bg-white dark:bg-rose-950", border: "border-rose-500", icon: "🔋" },
+  generic: { bg: "bg-white dark:bg-slate-900", border: "border-slate-500", icon: "📦" },
+};
+
+// Wire color to CSS color mapping
+export const WIRE_COLORS: Record<string, string> = {
+  RD: "#ef4444", // Red
+  BK: "#1f2937", // Black
+  WH: "#f9fafb", // White
+  GN: "#22c55e", // Green
+  BU: "#3b82f6", // Blue
+  YE: "#eab308", // Yellow
+  OG: "#f97316", // Orange
+  VT: "#8b5cf6", // Violet
+  PK: "#ec4899", // Pink
+  BN: "#92400e", // Brown
+  GY: "#6b7280", // Gray
+  TQ: "#14b8a6", // Turquoise
+  // Striped wires
+  "BK/WH": "repeating-linear-gradient(90deg, #1f2937 0px, #1f2937 4px, #f9fafb 4px, #f9fafb 8px)",
+  "RD/BK": "repeating-linear-gradient(90deg, #ef4444 0px, #ef4444 4px, #1f2937 4px, #1f2937 8px)",
+  "GN/WH": "repeating-linear-gradient(90deg, #22c55e 0px, #22c55e 4px, #f9fafb 4px, #f9fafb 8px)",
+};

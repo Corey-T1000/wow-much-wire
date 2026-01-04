@@ -18,36 +18,34 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Agentic Coding Boilerplate",
-    template: "%s | Agentic Coding Boilerplate",
+    default: "WireWise - Automotive Wiring Visualization",
+    template: "%s | WireWise",
   },
   description:
-    "Complete agentic coding boilerplate with authentication, database, AI integration, and modern tooling - perfect for building AI-powered applications and autonomous agents by Leon van Zyl",
+    "Interactive wiring diagram tool for automotive projects. Visualize connections, validate circuits, and get AI-powered verification for your vehicle rewire.",
   keywords: [
-    "Next.js",
-    "React",
-    "TypeScript",
-    "AI",
-    "OpenRouter",
-    "Boilerplate",
-    "Authentication",
-    "PostgreSQL",
+    "automotive",
+    "wiring",
+    "diagram",
+    "Miata",
+    "PDM",
+    "ECU",
+    "MS3Pro",
+    "electrical",
   ],
-  authors: [{ name: "Leon van Zyl" }],
-  creator: "Leon van Zyl",
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "Agentic Coding Boilerplate",
-    title: "Agentic Coding Boilerplate",
+    siteName: "WireWise",
+    title: "WireWise - Automotive Wiring Visualization",
     description:
-      "Complete agentic coding boilerplate with authentication, database, AI integration, and modern tooling",
+      "Interactive wiring diagram tool for automotive projects with AI-powered verification",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Agentic Coding Boilerplate",
+    title: "WireWise - Automotive Wiring Visualization",
     description:
-      "Complete agentic coding boilerplate with authentication, database, AI integration, and modern tooling",
+      "Interactive wiring diagram tool for automotive projects with AI-powered verification",
   },
   robots: {
     index: true,
@@ -59,19 +57,15 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Agentic Coding Boilerplate",
+  name: "WireWise",
   description:
-    "Complete agentic coding boilerplate with authentication, database, AI integration, and modern tooling",
-  applicationCategory: "DeveloperApplication",
+    "Interactive wiring diagram tool for automotive projects with AI-powered verification",
+  applicationCategory: "UtilitiesApplication",
   operatingSystem: "Any",
   offers: {
     "@type": "Offer",
     price: "0",
     priceCurrency: "USD",
-  },
-  author: {
-    "@type": "Person",
-    name: "Leon van Zyl",
   },
 };
 
