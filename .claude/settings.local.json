@@ -13,7 +13,8 @@
       "Bash(git log:*)",
       "Bash(find:*)",
       "Bash(git checkout:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "mcp__next-devtools__init"
     ]
   },
   "enableAllProjectMcpServers": true,
@@ -21,5 +22,6 @@
     "shadcn",
     "playwright",
     "next-devtools"
-  ]
+  ],
+  "outputStyle": "Explanatory"
 }
