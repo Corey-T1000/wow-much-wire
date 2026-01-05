@@ -15,7 +15,9 @@ export const sampleDiagramData: DiagramData = {
     { id: "circuit-engine", name: "Engine Management", color: "#ef4444", category: "engine" },
     { id: "circuit-tail", name: "Tail/Markers", color: "#ec4899", category: "lighting" },
     { id: "circuit-hazard", name: "Hazard/Turn", color: "#f97316", category: "lighting" },
-    { id: "circuit-ground", name: "Grounds", color: "#6b7280", category: "ground" },
+    { id: "circuit-ground", name: "Power Grounds", color: "#6b7280", category: "ground" },
+    { id: "circuit-sensor-ground", name: "Sensor Grounds", color: "#059669", category: "ground" },
+    { id: "circuit-5v-ref", name: "5V Reference", color: "#a855f7", category: "reference" },
     { id: "circuit-reverse", name: "Reverse Lights", color: "#c4b5fd", category: "lighting" }, // Light violet (visible on light/dark)
     { id: "circuit-brake", name: "Brake Lights", color: "#dc2626", category: "lighting" },
     { id: "circuit-marker", name: "Side Markers", color: "#ca8a04", category: "lighting" }, // Darker amber/gold
@@ -1828,14 +1830,14 @@ export const sampleDiagramData: DiagramData = {
     // ===========================================
     // CLT sensor
     { id: "wire-clt-sig", sourcePinId: "clt-sig", targetPinId: "ms3-23", color: "YE/GN", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
-    { id: "wire-clt-gnd", sourcePinId: "clt-gnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
+    { id: "wire-clt-gnd", sourcePinId: "clt-gnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-sensor-ground", isInstalled: false },
     // IAT sensor
     { id: "wire-iat-sig", sourcePinId: "iat-sig", targetPinId: "ms3-24", color: "YE/BU", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
-    { id: "wire-iat-gnd", sourcePinId: "iat-gnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
+    { id: "wire-iat-gnd", sourcePinId: "iat-gnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-sensor-ground", isInstalled: false },
     // TPS sensor
-    { id: "wire-tps-5v", sourcePinId: "ms3-35", targetPinId: "tps-5v", color: "VT", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
+    { id: "wire-tps-5v", sourcePinId: "ms3-35", targetPinId: "tps-5v", color: "VT", gauge: "20 AWG", circuitId: "circuit-5v-ref", isInstalled: false },
     { id: "wire-tps-sig", sourcePinId: "tps-sig", targetPinId: "ms3-22", color: "YE/VT", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
-    { id: "wire-tps-gnd", sourcePinId: "tps-gnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
+    { id: "wire-tps-gnd", sourcePinId: "tps-gnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-sensor-ground", isInstalled: false },
     // MAP sensor uses internal MS3Pro Mini onboard sensor (no external wiring)
     // Crank position sensor
     { id: "wire-crank-pos", sourcePinId: "crank-pos", targetPinId: "ms3-26", color: "WH/BU", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
@@ -1941,7 +1943,7 @@ export const sampleDiagramData: DiagramData = {
     // CLUTCH ECU SWITCH (Flat-foot / 2-step)
     // ===========================================
     { id: "wire-clutch-ecu", sourcePinId: "clutch-ecu-sig", targetPinId: "ms3-29", color: "GY/RD", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
-    { id: "wire-clutch-ecu-gnd", sourcePinId: "clutch-ecu-gnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
+    { id: "wire-clutch-ecu-gnd", sourcePinId: "clutch-ecu-gnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-sensor-ground", isInstalled: false },
 
     // ===========================================
     // BOOST SOLENOID
@@ -2026,7 +2028,7 @@ export const sampleDiagramData: DiagramData = {
     // ===========================================
     { id: "wire-afr-pwr", sourcePinId: "green-d", targetPinId: "afr-gauge-pwr", color: "RD", gauge: "16 AWG", circuitId: "circuit-engine", isInstalled: false },
     { id: "wire-afr-sig", sourcePinId: "afr-gauge-sig", targetPinId: "ms3-25", color: "GY", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
-    { id: "wire-afr-sgnd", sourcePinId: "afr-gauge-sgnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-engine", isInstalled: false },
+    { id: "wire-afr-sgnd", sourcePinId: "afr-gauge-sgnd", targetPinId: "ms3-3", color: "BK/WH", gauge: "20 AWG", circuitId: "circuit-sensor-ground", isInstalled: false },
 
     // ===========================================
     // ALTERNATOR EXCITER

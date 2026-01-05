@@ -67,12 +67,29 @@ export interface DiagramPosition {
   y: number;
 }
 
+/**
+ * Attachment types for notes and photos
+ */
+export type AttachmentEntityType = "component" | "connector" | "wire" | "pin";
+
+export interface DiagramAttachment {
+  id: string;
+  entityType: AttachmentEntityType;
+  entityId: string;
+  type: "note" | "photo";
+  content: string; // Text for notes, data URL for photos
+  caption?: string | undefined; // Optional caption for photos
+  createdAt: string; // ISO date string
+}
+
 export interface DiagramData {
   components: DiagramComponent[];
   circuits: DiagramCircuit[];
   wires: DiagramWire[];
   /** Component positions on the canvas, keyed by component ID */
   positions?: Record<string, DiagramPosition>;
+  /** Attachments (notes and photos) for diagram entities */
+  attachments?: DiagramAttachment[];
 }
 
 // Node data types for React Flow

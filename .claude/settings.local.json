@@ -30,7 +30,8 @@
       "Bash(docker ps:*)",
       "Bash(docker logs:*)",
       "WebSearch",
-      "WebFetch(domain:s3.amazonaws.com)"
+      "WebFetch(domain:s3.amazonaws.com)",
+      "Bash(git commit:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

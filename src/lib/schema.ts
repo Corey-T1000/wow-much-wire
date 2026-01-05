@@ -406,4 +406,40 @@ export const diagramSnapshot = pgTable(
 
 export const diagramSnapshotRelations = relations(diagramSnapshot, ({ one }) => ({
   project: one(project, { fields: [diagramSnapshot.projectId], references: [project.id] }),
+}));
+
+// =============================================================================
+// SHARED DIAGRAM LINKS
+// =============================================================================
+
+/**
+ * Stores shared diagram links for view-only access.
+ * Each share captures a snapshot of the diagram at the time of sharing.
+ */
+export const sharedDiagram = pgTable(
+  "shared_diagram",
+  {
+    id: text("id").primaryKey(), // Short URL-safe ID (nanoid)
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    // The diagram data snapshot at time of sharing
+    data: jsonb("data").notNull(),
+    // Metadata
+    title: text("title").notNull(),
+    description: text("description"),
+    // Access tracking
+    viewCount: integer("view_count").default(0),
+    // Timestamps
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at"), // Optional expiration
+  },
+  (table) => [
+    index("shared_diagram_project_id_idx").on(table.projectId),
+    index("shared_diagram_created_at_idx").on(table.createdAt),
+  ]
+);
+
+export const sharedDiagramRelations = relations(sharedDiagram, ({ one }) => ({
+  project: one(project, { fields: [sharedDiagram.projectId], references: [project.id] }),
 }))

@@ -12,6 +12,8 @@ import {
   RotateCcw,
   Undo2,
   Redo2,
+  Share2,
+  Printer,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,8 @@ interface DiagramMenuProps {
   onExport?: () => void;
   onAddComponent?: () => void;
   onResetToSource?: () => void;
+  onShare?: () => void;
+  onPrint?: () => void;
   /** Undo/Redo handlers */
   onUndo?: () => void;
   onRedo?: () => void;
@@ -39,6 +43,7 @@ interface DiagramMenuProps {
   /** Whether saved positions exist in the diagram data */
   hasSavedPositions: boolean;
   isLayouting: boolean;
+  isSharing?: boolean;
 }
 
 export function DiagramMenu({
@@ -46,12 +51,15 @@ export function DiagramMenu({
   onExport,
   onAddComponent,
   onResetToSource,
+  onShare,
+  onPrint,
   onUndo,
   onRedo,
   canUndo = false,
   canRedo = false,
   hasSavedPositions,
   isLayouting,
+  isSharing = false,
 }: DiagramMenuProps) {
   const { theme, setTheme } = useTheme();
 
@@ -106,6 +114,14 @@ export function DiagramMenu({
         <DropdownMenuItem onClick={onExport}>
           <FileDown className="mr-2 h-4 w-4" />
           Export
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onPrint}>
+          <Printer className="mr-2 h-4 w-4" />
+          Print...
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onShare} disabled={isSharing}>
+          <Share2 className="mr-2 h-4 w-4" />
+          {isSharing ? "Creating link..." : "Share Link"}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

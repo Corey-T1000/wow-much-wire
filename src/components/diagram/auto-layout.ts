@@ -321,6 +321,30 @@ export async function calculateAutoLayout(
     wiresBySourceComponent.set(sourceNodeId, existing);
   }
 
+  // Group wires by target COMPONENT for target-side spreading
+  // IMPORTANT: Sort wires within each group by target pin Y position
+  // This ensures wires to higher pins (smaller Y) get smaller indices,
+  // preventing horizontal segment crossings
+  const wiresByTargetComponent = new Map<string, typeof data.wires>();
+  for (const wire of data.wires) {
+    const targetNodeId = findComponentIdForPin(data.components, wire.targetPinId);
+    const existing = wiresByTargetComponent.get(targetNodeId) || [];
+    existing.push(wire);
+    wiresByTargetComponent.set(targetNodeId, existing);
+  }
+
+  // Sort wires within each target group by target pin position (Y coordinate)
+  // This is crucial: wires to pins higher up (smaller Y) should have smaller indices
+  // so they turn horizontal earlier, preventing crossings with wires going lower
+  for (const [targetNodeId, wires] of wiresByTargetComponent) {
+    wires.sort((a, b) => {
+      const pinIndexA = findPinIndexInComponent(data.components, a.targetPinId);
+      const pinIndexB = findPinIndexInComponent(data.components, b.targetPinId);
+      return pinIndexA - pinIndexB;
+    });
+    wiresByTargetComponent.set(targetNodeId, wires);
+  }
+
   // Calculate splice info for pins with multiple outgoing wires
   const spliceTotals = new Map<string, number>();
   for (const [sourcePinId, wires] of wiresBySourcePin) {
@@ -333,6 +357,21 @@ export async function calculateAutoLayout(
   const sourceComponentTotals = new Map<string, number>();
   for (const [sourceNodeId, wires] of wiresBySourceComponent) {
     sourceComponentTotals.set(sourceNodeId, wires.length);
+  }
+
+  // Calculate target component totals for target-side spreading
+  const targetComponentTotals = new Map<string, number>();
+  for (const [targetNodeId, wires] of wiresByTargetComponent) {
+    targetComponentTotals.set(targetNodeId, wires.length);
+  }
+
+  // Pre-calculate target pin indices based on sorted order
+  // This ensures wires to pins higher up (smaller Y) get smaller indices
+  const wireTargetPinIndex = new Map<string, number>();
+  for (const [, wires] of wiresByTargetComponent) {
+    wires.forEach((wire, index) => {
+      wireTargetPinIndex.set(wire.id, index);
+    });
   }
 
   // Track wire indices within groups for spreading
@@ -363,6 +402,12 @@ export async function calculateAutoLayout(
     const sourceComponentIndex = wireIndexInSourceComponent.get(sourceNodeId) || 0;
     wireIndexInSourceComponent.set(sourceNodeId, sourceComponentIndex + 1);
 
+    // Get wire index within TARGET component (for target-side spreading)
+    // Uses pre-calculated index based on target pin Y position (sorted order)
+    // This ensures wires to pins higher up get smaller indices, preventing crossings
+    const targetPinTotal = targetComponentTotals.get(targetNodeId) || 1;
+    const targetPinIndex = wireTargetPinIndex.get(wire.id) || 0;
+
     // Determine if this is a signal ground (dotted dark grey style)
     const signalGround = isSignalGround(wire);
 
@@ -380,6 +425,9 @@ export async function calculateAutoLayout(
         // Per-component spreading (each component starts from base offset)
         sourceComponentIndex,
         sourceComponentTotal,
+        // Target-side spreading (wires to same component get different corridors)
+        targetPinIndex,
+        targetPinTotal,
       },
       style: {
         stroke: signalGround
@@ -415,6 +463,29 @@ function findComponentIdForPin(
     }
   }
   return "";
+}
+
+/**
+ * Find the index of a pin within its component (across all connectors).
+ * This represents the pin's vertical position - lower index = higher on screen.
+ * Used for sorting wires by target pin position to prevent crossings.
+ */
+function findPinIndexInComponent(
+  components: DiagramComponent[],
+  pinId: string
+): number {
+  for (const component of components) {
+    let pinIndex = 0;
+    for (const connector of component.connectors) {
+      for (const pin of connector.pins) {
+        if (pin.id === pinId) {
+          return pinIndex;
+        }
+        pinIndex++;
+      }
+    }
+  }
+  return 0;
 }
 
 function getStrokeWidth(gauge: string | null): number {

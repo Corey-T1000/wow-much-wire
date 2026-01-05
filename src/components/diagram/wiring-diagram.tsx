@@ -24,6 +24,8 @@ import { Loader2 } from "lucide-react";
 import { calculateAutoLayout } from "./auto-layout";
 import { ComponentNode } from "./component-node";
 import { DiagramMenu } from "./diagram-menu";
+import { PrintDialog } from "./print/print-dialog";
+import { usePrintCapture } from "./print/use-print-capture";
 import { useUndoRedo } from "./use-undo-redo";
 import { WireEdge } from "./wire-edge";
 import type { DiagramData, DiagramPosition, ComponentNodeData } from "./types";
@@ -41,6 +43,12 @@ interface WiringDiagramProps {
   onPositionsChange?: (positions: Record<string, DiagramPosition>) => void;
   /** Called when user wants to reset diagram to source data */
   onResetToSource?: () => void;
+  /** Called when user wants to share the diagram */
+  onShare?: () => void;
+  /** Whether a share is currently being created */
+  isSharing?: boolean;
+  /** Read-only mode for shared/view-only diagrams */
+  readOnly?: boolean;
 }
 
 // Register custom node types
@@ -122,6 +130,9 @@ function WiringDiagramInner({
   onPinSelect,
   onPositionsChange,
   onResetToSource,
+  onShare,
+  isSharing = false,
+  readOnly = false,
 }: WiringDiagramProps) {
   const isFiltering = highlightedCircuits.length > 0;
   const relevantComponents = useMemo(
@@ -133,7 +144,11 @@ function WiringDiagramInner({
   );
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
   const [isLayouting, setIsLayouting] = useState(false);
+  const [isPrintOpen, setIsPrintOpen] = useState(false);
   const { fitView } = useReactFlow();
+
+  // Print capture hook
+  const { getDiagramBounds } = usePrintCapture();
 
   // Track if we have positions in the data (for showing "has saved" state)
   const hasSavedPositions = Boolean(data.positions && Object.keys(data.positions).length > 0);
@@ -426,11 +441,15 @@ function WiringDiagramInner({
         panOnScroll
         zoomOnScroll={false}
         zoomOnPinch
+        // Disable editing in read-only mode
+        nodesDraggable={!readOnly}
+        nodesConnectable={!readOnly}
+        elementsSelectable={!readOnly}
         // Multi-selection: Shift+click to add/remove, Shift+drag for box select
-        selectionOnDrag
+        selectionOnDrag={!readOnly}
         selectionMode={SelectionMode.Partial}
-        selectionKeyCode="Shift"
-        multiSelectionKeyCode="Shift"
+        selectionKeyCode={readOnly ? null : "Shift"}
+        multiSelectionKeyCode={readOnly ? null : "Shift"}
         deleteKeyCode={null} // Disable delete key to prevent accidental deletions
         defaultEdgeOptions={{
           type: "smoothstep",
@@ -463,32 +482,45 @@ function WiringDiagramInner({
         />
       </ReactFlow>
 
-      {/* Menu - positioned in top right */}
-      <div className="absolute top-4 right-4">
-        <DiagramMenu
-          onAutoLayout={runAutoLayout}
-          {...(onResetToSource && { onResetToSource })}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          canUndo={canUndo}
-          canRedo={canRedo}
-          hasSavedPositions={hasSavedPositions}
-          isLayouting={isLayouting}
-        />
-      </div>
+      {/* Menu - positioned in top right (hidden in read-only mode) */}
+      {!readOnly && (
+        <div className="absolute top-4 right-4">
+          <DiagramMenu
+            onAutoLayout={runAutoLayout}
+            {...(onResetToSource && { onResetToSource })}
+            {...(onShare && { onShare })}
+            onPrint={() => setIsPrintOpen(true)}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            hasSavedPositions={hasSavedPositions}
+            isLayouting={isLayouting}
+            isSharing={isSharing}
+          />
+        </div>
+      )}
 
-      {/* Circuit Legend */}
+      {/* View-only badge */}
+      {readOnly && (
+        <div className="absolute top-4 right-4 bg-neutral-800/90 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-2">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          View Only
+        </div>
+      )}
+
+      {/* Circuit Legend - positioned higher on mobile to avoid bottom bar */}
       {data.circuits.length > 0 && (
-        <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm rounded-lg p-3 border border-neutral-200 dark:border-neutral-700">
+        <div className="absolute bottom-20 md:bottom-4 left-4 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm rounded-lg p-3 border border-neutral-200 dark:border-neutral-700 max-h-[40vh] overflow-y-auto">
           <div className="text-xs font-semibold text-neutral-900 dark:text-white mb-2">Circuits</div>
           <div className="space-y-1">
             {data.circuits.map((circuit) => (
               <div key={circuit.id} className="flex items-center gap-2 text-xs">
                 <div
-                  className="w-3 h-3 rounded-full"
+                  className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: circuit.color }}
                 />
-                <span className="text-neutral-700 dark:text-white/80">{circuit.name}</span>
+                <span className="text-neutral-700 dark:text-white/80 truncate">{circuit.name}</span>
               </div>
             ))}
           </div>
@@ -510,8 +542,8 @@ function WiringDiagramInner({
         </div>
       )}
 
-      {/* Keyboard hints - bottom right */}
-      <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-neutral-200 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400">
+      {/* Keyboard hints - bottom right (hidden on mobile/touch devices) */}
+      <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-neutral-200 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400 hidden md:block">
         <div className="flex items-center gap-3">
           <span><kbd className="px-1.5 py-0.5 bg-neutral-100 dark:bg-neutral-800 rounded text-[10px] font-mono">⇧ Shift</kbd> + click to multi-select</span>
           <span><kbd className="px-1.5 py-0.5 bg-neutral-100 dark:bg-neutral-800 rounded text-[10px] font-mono">⇧ Shift</kbd> + drag for box select</span>
@@ -527,6 +559,14 @@ function WiringDiagramInner({
           </div>
         </div>
       )}
+
+      {/* Print Dialog */}
+      <PrintDialog
+        data={data}
+        getDiagramBounds={getDiagramBounds}
+        open={isPrintOpen}
+        onOpenChange={setIsPrintOpen}
+      />
     </div>
   );
 }

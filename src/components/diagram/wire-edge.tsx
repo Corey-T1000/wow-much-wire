@@ -15,6 +15,8 @@ interface WireEdgeData {
   spliceTotal?: number;
   sourceComponentIndex?: number;
   sourceComponentTotal?: number;
+  targetPinIndex?: number;
+  targetPinTotal?: number;
 }
 
 interface BoundingBox {
@@ -122,6 +124,8 @@ function findClearVerticalX(
 /**
  * Build an orthogonal path with collision avoidance.
  * Simple, clean approach: wires run parallel when possible, only spreading when needed.
+ * Key improvement: wires going to the same target component get different corridors
+ * to prevent overlap of vertical segments.
  */
 function buildOrthogonalPath(
   sourceX: number,
@@ -140,13 +144,20 @@ function buildOrthogonalPath(
 
   const isSplice = (edgeData?.spliceTotal || 1) > 1;
   const sourceComponentIndex = edgeData?.sourceComponentIndex || 0;
+  const targetPinIndex = edgeData?.targetPinIndex || 0;
   const goingDown = targetY > sourceY;
 
   // Calculate the vertical corridor X position
   // Wires from the same component spread slightly, splices share a corridor
+  // IMPORTANT: Also spread based on target pin index to prevent wires to same component from overlapping
   let corridorX = isSplice
     ? sourceX - SPLICE_OFFSET
     : sourceX - SPLICE_OFFSET - (sourceComponentIndex * WIRE_SPREAD);
+
+  // Additional spread based on target pin index - each wire to a different pin
+  // on the same target component gets its own corridor
+  // This is the key fix for the overlapping wire problem
+  corridorX -= (targetPinIndex * WIRE_SPREAD);
 
   // Push corridor left if it would collide with any component
   corridorX = findClearVerticalX(corridorX, sourceY, targetY, nodeBoundingBoxes);

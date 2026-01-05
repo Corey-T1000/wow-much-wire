@@ -9,7 +9,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { DiagramCircuit } from "./types";
 
 interface CircuitFilterProps {
@@ -32,13 +31,14 @@ function groupByCategory(circuits: DiagramCircuit[]) {
 }
 
 const categoryLabels: Record<string, string> = {
-  lighting: "💡 Lighting",
-  engine: "🔧 Engine",
-  fuel: "⛽ Fuel",
-  cooling: "❄️ Cooling",
-  accessories: "🔌 Accessories",
-  ground: "⏚ Grounds",
-  other: "📦 Other",
+  lighting: "Lighting",
+  engine: "Engine",
+  fuel: "Fuel",
+  cooling: "Cooling",
+  accessories: "Accessories",
+  ground: "Grounds",
+  reference: "Reference",
+  other: "Other",
 };
 
 export function CircuitFilter({
@@ -141,84 +141,82 @@ export function CircuitFilter({
             </p>
           )}
 
-          <ScrollArea className="h-[280px]">
-            <div className="space-y-3 pr-2">
-              {categories.map((category) => {
-                const categoryCircuits = groupedCircuits[category] ?? [];
-                const categoryCircuitIds = categoryCircuits.map((c) => c.id);
-                const selectedInCategory = categoryCircuitIds.filter((id) =>
-                  selectedCircuits.includes(id)
-                ).length;
+          <div className="space-y-3">
+            {categories.map((category) => {
+              const categoryCircuits = groupedCircuits[category] ?? [];
+              const categoryCircuitIds = categoryCircuits.map((c) => c.id);
+              const selectedInCategory = categoryCircuitIds.filter((id) =>
+                selectedCircuits.includes(id)
+              ).length;
 
-                return (
-                  <div key={category} className="space-y-1">
-                    {/* Category header */}
-                    <button
-                      onClick={() => selectCategory(category)}
-                      className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-1 py-0.5"
-                    >
-                      <span>{categoryLabels[category] || category}</span>
-                      {selectedInCategory > 0 && (
-                        <span className="text-amber-500">
-                          {selectedInCategory}/{categoryCircuits.length}
-                        </span>
-                      )}
-                    </button>
+              return (
+                <div key={category} className="space-y-1">
+                  {/* Category header */}
+                  <button
+                    onClick={() => selectCategory(category)}
+                    className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-1 py-0.5"
+                  >
+                    <span>{categoryLabels[category] || category}</span>
+                    {selectedInCategory > 0 && (
+                      <span className="text-amber-500">
+                        {selectedInCategory}/{categoryCircuits.length}
+                      </span>
+                    )}
+                  </button>
 
-                    {/* Circuit buttons */}
-                    <div className="space-y-0.5">
-                      {categoryCircuits.map((circuit) => {
-                        const isSelected = selectedCircuits.includes(circuit.id);
-                        return (
-                          <div
-                            key={circuit.id}
-                            className="flex items-center gap-1 group"
+                  {/* Circuit buttons */}
+                  <div className="space-y-0.5">
+                    {categoryCircuits.map((circuit) => {
+                      const isSelected = selectedCircuits.includes(circuit.id);
+                      return (
+                        <div
+                          key={circuit.id}
+                          className="flex items-center gap-1 group"
+                        >
+                          <button
+                            onClick={() => toggleCircuit(circuit.id)}
+                            className={`
+                              flex items-center gap-2 flex-1 px-2 py-1 rounded text-xs transition-all
+                              ${
+                                isSelected
+                                  ? "bg-amber-500/20 text-foreground"
+                                  : isFiltering
+                                  ? "text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/50"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                              }
+                            `}
                           >
-                            <button
-                              onClick={() => toggleCircuit(circuit.id)}
-                              className={`
-                                flex items-center gap-2 flex-1 px-2 py-1 rounded text-xs transition-all
-                                ${
-                                  isSelected
-                                    ? "bg-amber-500/20 text-foreground"
-                                    : isFiltering
-                                    ? "text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/50"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                                }
-                              `}
-                            >
-                              <div
-                                className="w-2.5 h-2.5 rounded-full shrink-0"
-                                style={{
-                                  backgroundColor: circuit.color,
-                                  opacity: isFiltering && !isSelected ? 0.3 : 1,
-                                }}
-                              />
-                              <span className="truncate">{circuit.name}</span>
-                              {isSelected ? (
-                                <Eye className="h-3 w-3 ml-auto shrink-0 text-amber-500" />
-                              ) : (
-                                <EyeOff className="h-3 w-3 ml-auto shrink-0 opacity-0 group-hover:opacity-50" />
-                              )}
-                            </button>
+                            <div
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{
+                                backgroundColor: circuit.color,
+                                opacity: isFiltering && !isSelected ? 0.3 : 1,
+                              }}
+                            />
+                            <span className="truncate">{circuit.name}</span>
+                            {isSelected ? (
+                              <Eye className="h-3 w-3 ml-auto shrink-0 text-amber-500" />
+                            ) : (
+                              <EyeOff className="h-3 w-3 ml-auto shrink-0 opacity-0 group-hover:opacity-50" />
+                            )}
+                          </button>
 
-                            {/* "Only" button for quick single-select */}
-                            <button
-                              onClick={() => selectOnly(circuit.id)}
-                              className="opacity-0 group-hover:opacity-100 text-[10px] text-muted-foreground hover:text-amber-500 transition-opacity px-1"
-                              title="Show only this circuit"
-                            >
-                              only
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
+                          {/* "Only" button for quick single-select */}
+                          <button
+                            onClick={() => selectOnly(circuit.id)}
+                            className="opacity-0 group-hover:opacity-100 text-[10px] text-muted-foreground hover:text-amber-500 transition-opacity px-1"
+                            title="Show only this circuit"
+                          >
+                            only
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </CollapsibleContent>
     </Collapsible>

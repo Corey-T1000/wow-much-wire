@@ -24,9 +24,11 @@ interface SaveDialogProps {
     wiresAdded?: number;
     wiresModified?: number;
   };
+  /** Custom trigger element (for mobile bottom bar) */
+  trigger?: React.ReactNode;
 }
 
-export function SaveDialog({ onSave, disabled, pendingChanges }: SaveDialogProps) {
+export function SaveDialog({ onSave, disabled, pendingChanges, trigger }: SaveDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -64,18 +66,22 @@ export function SaveDialog({ onSave, disabled, pendingChanges }: SaveDialogProps
     return parts.join(", ");
   };
 
+  const defaultTrigger = (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={disabled}
+      className="bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700"
+    >
+      <Save className="h-4 w-4 mr-2" />
+      Save Version
+    </Button>
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          className="bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700"
-        >
-          <Save className="h-4 w-4 mr-2" />
-          Save Version
-        </Button>
+      <DialogTrigger asChild disabled={disabled}>
+        {trigger || defaultTrigger}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

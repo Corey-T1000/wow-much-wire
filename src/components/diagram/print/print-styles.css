@@ -1,0 +1,233 @@
+/**
+ * Print-specific styles for wiring diagram printing.
+ * Forces light theme and optimizes layout for printing.
+ */
+
+/* ============================================
+   PRINT MEDIA STYLES
+   ============================================ */
+@media print {
+  /* Hide non-printable UI elements */
+  .no-print,
+  .react-flow__controls,
+  .react-flow__minimap,
+  .react-flow__background,
+  .react-flow__panel,
+  nav,
+  header,
+  footer,
+  .site-header,
+  .site-footer,
+  [data-slot="dialog-close"],
+  [role="dialog"],
+  .dialog-overlay {
+    display: none !important;
+  }
+
+  /* Reset body for print */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 10pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force light mode for all elements */
+  * {
+    color-scheme: light !important;
+  }
+
+  /* Override dark mode backgrounds */
+  .dark,
+  [data-theme="dark"],
+  .dark\:bg-neutral-950,
+  .dark\:bg-neutral-900,
+  .dark\:bg-neutral-800,
+  .dark\:bg-neutral-700 {
+    background-color: white !important;
+  }
+
+  /* Override dark mode text colors */
+  .dark\:text-white,
+  .dark\:text-white\/90,
+  .dark\:text-white\/80,
+  .dark\:text-white\/70,
+  .dark\:text-neutral-100,
+  .dark\:text-neutral-200,
+  .dark\:text-neutral-300 {
+    color: black !important;
+  }
+
+  /* Override dark mode borders */
+  .dark\:border-neutral-700,
+  .dark\:border-neutral-600,
+  .dark\:border-neutral-500 {
+    border-color: #d1d5db !important;
+  }
+}
+
+/* ============================================
+   PINOUT PRINT STYLES
+   ============================================ */
+
+.print-pinout-view {
+  background: white;
+  color: black;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 10pt;
+  line-height: 1.4;
+}
+
+.print-pinout-view .component-pinout {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  margin-bottom: 24pt;
+}
+
+.print-pinout-view .connector-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.print-pinout-view .connector-table th,
+.print-pinout-view .connector-table td {
+  border: 0.5pt solid #999;
+  padding: 4pt 6pt;
+  text-align: left;
+  vertical-align: top;
+}
+
+.print-pinout-view .connector-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.print-pinout-view .pin-unused {
+  color: #9ca3af;
+}
+
+.print-pinout-view .wire-color-dot {
+  display: inline-block;
+  width: 8pt;
+  height: 8pt;
+  border-radius: 50%;
+  border: 0.5pt solid #666;
+  vertical-align: middle;
+  margin-right: 4pt;
+}
+
+/* ============================================
+   POSTER PRINT STYLES
+   ============================================ */
+
+.poster-print-container {
+  background: white;
+}
+
+.poster-tile {
+  page-break-after: always;
+  break-after: page;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.poster-tile:last-child {
+  page-break-after: auto;
+  break-after: auto;
+}
+
+.poster-tile .tile-content {
+  position: absolute;
+  overflow: hidden;
+}
+
+.poster-tile .page-label {
+  position: absolute;
+  bottom: 8mm;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8pt;
+  color: #666;
+  font-family: system-ui, sans-serif;
+}
+
+/* Crop marks - thin lines for precision */
+.crop-marks-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.crop-mark {
+  stroke: #000;
+  stroke-width: 0.25pt;
+  fill: none;
+}
+
+.registration-mark {
+  stroke: #000;
+  stroke-width: 0.2pt;
+  fill: none;
+}
+
+/* ============================================
+   PRINT PREVIEW STYLES (in dialog)
+   ============================================ */
+
+.print-preview-frame {
+  background: white;
+  color: black;
+  font-family: system-ui, -apple-system, sans-serif;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  overflow: auto;
+  max-height: 300px;
+}
+
+.print-preview-frame.light-theme {
+  /* Force all children to use light theme colors */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+  --border: 0 0% 89.8%;
+}
+
+/* Tile grid preview */
+.tile-grid-preview {
+  display: grid;
+  gap: 2px;
+  max-width: 200px;
+}
+
+.tile-grid-preview .tile-cell {
+  aspect-ratio: 8.5 / 11;
+  background: white;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #9ca3af;
+  border-radius: 2px;
+}
+
+.tile-grid-preview .tile-cell.landscape {
+  aspect-ratio: 11 / 8.5;
+}

@@ -1,7 +1,10 @@
 export { WiringDiagram } from "./wiring-diagram";
 export { ComponentNode } from "./component-node";
-export { WiringChat } from "./wiring-chat";
 export { HistoryPanel } from "./history-panel";
 export { SaveDialog } from "./save-dialog";
 export { CircuitFilter } from "./circuit-filter";
+export { SearchCommand } from "./search-command";
+export { PinDiagram } from "./pin-diagram";
+export { NotesPanel } from "./notes-panel";
+export { WiringTips } from "./wiring-tips";
 export * from "./types";
