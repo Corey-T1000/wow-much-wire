@@ -445,9 +445,17 @@ function WiringDiagramInner({
     }
   }, [redo, setNodes, onPositionsChange]);
 
-  // Keyboard shortcuts for undo/redo
+  // Keyboard shortcuts for undo/redo and escape to cancel
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape clears pin selection
+      if (e.key === "Escape") {
+        if (selectedPin) {
+          e.preventDefault();
+          setSelectedPin(null);
+          onPinSelect?.(null);
+        }
+      }
       // Check for Ctrl+Z (Windows/Linux) or Cmd+Z (Mac)
       if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         if (e.shiftKey) {
@@ -469,7 +477,7 @@ function WiringDiagramInner({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleUndo, handleRedo]);
+  }, [handleUndo, handleRedo, selectedPin, onPinSelect]);
 
   const onConnect: OnConnect = useCallback(
     (params) => {
@@ -487,6 +495,14 @@ function WiringDiagramInner({
     },
     [onComponentSelect]
   );
+
+  // Clear pin selection when clicking on empty canvas
+  const onPaneClick = useCallback(() => {
+    if (selectedPin) {
+      setSelectedPin(null);
+      onPinSelect?.(null);
+    }
+  }, [selectedPin, onPinSelect]);
 
   // Handle selection changes to update visual state
   const onSelectionChange: OnSelectionChangeFunc = useCallback(
@@ -565,6 +581,7 @@ function WiringDiagramInner({
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
         onSelectionChange={onSelectionChange}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
