@@ -12,8 +12,6 @@ interface CircuitTabsProps {
   selectedCircuits: Set<string>;
   /** Called when selection changes */
   onSelectionChange: (circuits: Set<string>) => void;
-  /** Optional: show modified indicator for views with custom positions */
-  modifiedViews?: Set<ViewId>;
 }
 
 /**
@@ -29,7 +27,6 @@ function CircuitTabsComponent({
   circuits,
   selectedCircuits,
   onSelectionChange,
-  modifiedViews = new Set(),
 }: CircuitTabsProps) {
   const isFullView = selectedCircuits.size === 0;
 
@@ -67,7 +64,6 @@ function CircuitTabsComponent({
           label="Full Diagram"
           isActive={isFullView}
           onClick={handleFullDiagramClick}
-          isModified={modifiedViews.has("full")}
         />
 
         {/* Separator */}
@@ -81,7 +77,6 @@ function CircuitTabsComponent({
             color={circuit.color}
             isActive={selectedCircuits.has(circuit.id)}
             onClick={(e) => handleCircuitClick(circuit.id, e)}
-            isModified={modifiedViews.has(circuit.id)}
           />
         ))}
 
@@ -104,10 +99,9 @@ interface TabProps {
   color?: string;
   isActive: boolean;
   onClick: (event: React.MouseEvent) => void;
-  isModified?: boolean;
 }
 
-function Tab({ label, color, isActive, onClick, isModified }: TabProps) {
+function Tab({ label, color, isActive, onClick }: TabProps) {
   return (
     <button
       onClick={(e) => onClick(e)}
@@ -143,11 +137,6 @@ function Tab({ label, color, isActive, onClick, isModified }: TabProps) {
 
       {/* Label */}
       <span className="truncate max-w-[100px]">{label}</span>
-
-      {/* Modified indicator (dot) */}
-      {isModified && (
-        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-      )}
     </button>
   );
 }

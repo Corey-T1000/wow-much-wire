@@ -155,8 +155,8 @@ function buildOrthogonalPath(
   const baseCorridorX = sourceX - SPLICE_OFFSET;
 
   // Each wire gets its own lane based on global index
-  // Use smaller spread (4px) since we're spreading ALL wires now
-  const GLOBAL_SPREAD = 4;
+  // 16px spread provides clear visual separation between wires
+  const GLOBAL_SPREAD = 16;
   let corridorX = baseCorridorX - (globalWireIndex * GLOBAL_SPREAD);
 
   // Push corridor left if it would collide with any component

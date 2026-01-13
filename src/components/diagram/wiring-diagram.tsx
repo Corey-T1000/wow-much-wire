@@ -545,17 +545,6 @@ function WiringDiagramInner({
     [nodes, selectedCircuits, viewPositions, setNodes, fitView]
   );
 
-  // Track which views have been modified (have saved positions)
-  const modifiedViews = useMemo(() => {
-    const modified = new Set<ViewId>();
-    for (const [viewId, positions] of Object.entries(viewPositions)) {
-      if (Object.keys(positions).length > 0) {
-        modified.add(viewId);
-      }
-    }
-    return modified;
-  }, [viewPositions]);
-
   return (
     <div className="h-full w-full flex flex-col bg-neutral-100 dark:bg-neutral-950">
       {/* Circuit View Tabs */}
@@ -564,7 +553,6 @@ function WiringDiagramInner({
           circuits={data.circuits}
           selectedCircuits={selectedCircuits}
           onSelectionChange={handleSelectionChange}
-          modifiedViews={modifiedViews}
         />
       )}
 
