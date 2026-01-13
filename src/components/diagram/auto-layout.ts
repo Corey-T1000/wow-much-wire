@@ -148,48 +148,47 @@ function estimateNodeSize(component: DiagramComponent): { width: number; height:
 }
 
 // =============================================================================
-// ELK LAYOUT OPTIONS - Optimized for schematic clarity
+// ELK LAYOUT OPTIONS - Optimized for 16:9 display with layered algorithm
 // =============================================================================
 const layoutOptions = {
-  // Core algorithm - layered creates clear left-to-right flow
+  // Layered algorithm for proper signal flow (left to right)
   "elk.algorithm": "layered",
   "elk.direction": "RIGHT",
 
-  // PRIORITY: Crossing minimization over compactness
-  // This is THE most important setting for readable schematics
+  // Target aspect ratio for 16:9 displays
+  "elk.aspectRatio": "1.78",
+
+  // PARTITIONING - Key for 16:9 optimization
+  // Groups components by circuit into horizontal bands
+  "elk.partitioning.activate": "true",
+
+  // Crossing minimization
   "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
   "elk.layered.crossingMinimization.greedySwitch.type": "TWO_SIDED",
-  "elk.layered.crossingMinimization.semiInteractive": "true",
-
-  // Thoroughness - higher = more iterations for better crossing reduction
   "elk.layered.thoroughness": "100",
 
-  // Spacing - generous for wire clarity
-  "elk.spacing.nodeNode": "120",
-  "elk.layered.spacing.nodeNodeBetweenLayers": "250",
-  "elk.spacing.edgeNode": "60",
-  "elk.spacing.edgeEdge": "30",
+  // Spacing - wider horizontal gaps, tighter vertical
+  "elk.spacing.nodeNode": "40",           // Tight vertical within partitions
+  "elk.layered.spacing.nodeNodeBetweenLayers": "200", // Wide horizontal layers
+  "elk.spacing.edgeNode": "30",
+  "elk.spacing.edgeEdge": "15",
+  "elk.layered.spacing.edgeNodeBetweenLayers": "40",
 
-  // Node placement - BRANDES_KOEPF works well with crossing minimization
-  "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
-  "elk.layered.nodePlacement.bk.fixedAlignment": "BALANCED",
+  // Node placement
+  "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
 
-  // Edge routing - orthogonal for schematic clarity
+  // Edge routing
   "elk.edgeRouting": "ORTHOGONAL",
   "elk.layered.unnecessaryBendpoints": "true",
 
-  // Layering - use LONGEST_PATH for better hierarchical structure
-  "elk.layered.layering.strategy": "LONGEST_PATH",
+  // Layering strategy
+  "elk.layered.layering.strategy": "NETWORK_SIMPLEX",
 
-  // Respect the model order we provide (sorted by circuit priority)
+  // Consider model order for predictable positioning
   "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",
-  "elk.layered.considerModelOrder.noModelOrder": "false",
 
-  // Minimize edge length as secondary goal
+  // Compaction
   "elk.layered.compaction.postCompaction.strategy": "EDGE_LENGTH",
-
-  // Interactive mode - respects constraints we set
-  "elk.layered.interactiveReferencePoint": "CENTER",
 };
 
 // Return type for layout calculation
@@ -260,6 +259,10 @@ export async function calculateAutoLayout(
       }
     }
 
+    // Assign partition based on circuit priority groupings
+    // This creates horizontal bands: lighting (0-2), controls (3-5), power (6-8)
+    const partitionId = Math.floor(circuitPriority / 3);
+
     return {
       id: component.id,
       width: size.width,
@@ -267,10 +270,10 @@ export async function calculateAutoLayout(
       ports,
       // Use layout options to hint at layer and position
       layoutOptions: {
-        // Layer constraint based on role (0=leftmost, 4=rightmost)
-        "elk.layered.layering.layerConstraint": role === "hub" ? "NONE" : "NONE",
-        // Position hint within layer based on circuit priority
-        "elk.position": `(0, ${circuitPriority * 100})`,
+        // Partition for horizontal grouping (creates rows of related circuits)
+        "elk.partitioning.partition": String(partitionId),
+        // Position hint within partition based on circuit priority
+        "elk.position": `(0, ${(circuitPriority % 3) * 100})`,
         // Priority for this node (higher = processed first)
         "elk.priority": String(100 - index),
       },

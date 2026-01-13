@@ -150,6 +150,7 @@ function WiringDiagramInner({
   );
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
   const [isLayouting, setIsLayouting] = useState(false);
+  const [layoutProgress, setLayoutProgress] = useState<number | undefined>(undefined);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   // Selected circuits - empty set means "full view" (all circuits visible)
   const [selectedCircuits, setSelectedCircuits] = useState<Set<string>>(new Set());
@@ -373,6 +374,83 @@ function WiringDiagramInner({
       setIsLayouting(false);
     }
   }, [data, nodes, handlePinClick, setNodes, setEdges, fitView, initializeHistory]);
+
+  // Auto-layout all individual circuits at once
+  const runAutoLayoutAllCircuits = useCallback(async () => {
+    setIsLayouting(true);
+    setLayoutProgress(0);
+
+    const circuits = data.circuits;
+    const newViewPositions: Record<ViewId, Record<string, DiagramPosition>> = {};
+
+    try {
+      for (let i = 0; i < circuits.length; i++) {
+        const circuit = circuits[i];
+        if (!circuit) continue;
+
+        // Update progress
+        setLayoutProgress(Math.round((i / circuits.length) * 100));
+
+        // Get components relevant to this circuit
+        const relevantComponentIds = getRelevantComponents(data, [circuit.id]);
+
+        // Filter components for this circuit
+        const filteredComponents = data.components.filter((c) =>
+          relevantComponentIds.has(c.id)
+        );
+
+        // Filter wires for this circuit
+        const filteredWires = data.wires.filter(
+          (w) => w.circuitId === circuit.id
+        );
+
+        // Skip if no components in this circuit
+        if (filteredComponents.length === 0) continue;
+
+        // Create filtered data for layout
+        const filteredData: DiagramData = {
+          ...data,
+          components: filteredComponents,
+          wires: filteredWires,
+        };
+
+        // Run auto-layout for this circuit's components
+        const { nodes: layoutedNodes, junctionNodes } = await calculateAutoLayout(
+          filteredData,
+          nodes.filter((n) => relevantComponentIds.has(n.id))
+        );
+
+        // Extract positions for this circuit view
+        const circuitPositions: Record<string, DiagramPosition> = {};
+        for (const node of [...layoutedNodes, ...junctionNodes]) {
+          circuitPositions[node.id] = node.position;
+        }
+
+        // Save to view positions
+        newViewPositions[circuit.id] = circuitPositions;
+
+        // Small delay to allow UI to update
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+
+      // Update view positions state with all new layouts
+      setViewPositions((prev) => ({
+        ...prev,
+        ...newViewPositions,
+      }));
+
+      setLayoutProgress(100);
+
+      // Brief delay before clearing progress
+      setTimeout(() => {
+        setLayoutProgress(undefined);
+      }, 500);
+    } catch (error) {
+      console.error("Auto-layout all circuits failed:", error);
+    } finally {
+      setIsLayouting(false);
+    }
+  }, [data, nodes]);
 
   // Run layout on initial mount - use saved positions if available
   useEffect(() => {
@@ -638,6 +716,7 @@ function WiringDiagramInner({
         <div className="absolute top-4 right-4">
           <DiagramMenu
             onAutoLayout={runAutoLayout}
+            onAutoLayoutAllCircuits={runAutoLayoutAllCircuits}
             {...(onResetToSource && { onResetToSource })}
             {...(onShare && { onShare })}
             onPrint={() => setIsPrintOpen(true)}
@@ -648,6 +727,7 @@ function WiringDiagramInner({
             hasSavedPositions={hasSavedPositions}
             isLayouting={isLayouting}
             isSharing={isSharing}
+            layoutProgress={layoutProgress}
           />
         </div>
       )}

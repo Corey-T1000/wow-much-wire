@@ -3,6 +3,7 @@
 import {
   Menu,
   LayoutGrid,
+  Layers,
   FileDown,
   PlusCircle,
   Sun,
@@ -30,6 +31,8 @@ import {
 
 interface DiagramMenuProps {
   onAutoLayout: () => void;
+  /** Auto-layout all individual circuits at once */
+  onAutoLayoutAllCircuits?: () => void;
   onExport?: () => void;
   onAddComponent?: () => void;
   onResetToSource?: () => void;
@@ -44,10 +47,13 @@ interface DiagramMenuProps {
   hasSavedPositions: boolean;
   isLayouting: boolean;
   isSharing?: boolean;
+  /** Progress indicator for batch operations (0-100) */
+  layoutProgress?: number;
 }
 
 export function DiagramMenu({
   onAutoLayout,
+  onAutoLayoutAllCircuits,
   onExport,
   onAddComponent,
   onResetToSource,
@@ -60,6 +66,7 @@ export function DiagramMenu({
   hasSavedPositions,
   isLayouting,
   isSharing = false,
+  layoutProgress,
 }: DiagramMenuProps) {
   const { theme, setTheme } = useTheme();
 
@@ -95,6 +102,14 @@ export function DiagramMenu({
           <LayoutGrid className="mr-2 h-4 w-4" />
           Re-arrange Layout
         </DropdownMenuItem>
+        {onAutoLayoutAllCircuits && (
+          <DropdownMenuItem onClick={onAutoLayoutAllCircuits} disabled={isLayouting}>
+            <Layers className="mr-2 h-4 w-4" />
+            {layoutProgress !== undefined
+              ? `Layouting... ${layoutProgress}%`
+              : "Auto-layout All Circuits"}
+          </DropdownMenuItem>
+        )}
 
         {/* Layout status indicator */}
         {hasSavedPositions && (
