@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import type { DiagramCircuit } from "./types";
 
@@ -8,8 +8,10 @@ export type ViewId = "full" | string; // "full" or circuit ID
 
 interface CircuitTabsProps {
   circuits: DiagramCircuit[];
-  activeView: ViewId;
-  onViewChange: (viewId: ViewId) => void;
+  /** Currently selected circuits - empty set means "full" view */
+  selectedCircuits: Set<string>;
+  /** Called when selection changes */
+  onSelectionChange: (circuits: Set<string>) => void;
   /** Optional: show modified indicator for views with custom positions */
   modifiedViews?: Set<ViewId>;
 }
@@ -17,21 +19,54 @@ interface CircuitTabsProps {
 /**
  * IDE-style tabs for switching between circuit views.
  * "Full Diagram" shows all circuits, individual circuit tabs show focused views.
+ *
+ * Interaction:
+ * - Click: Select single circuit (replaces selection)
+ * - Cmd/Ctrl+Click: Toggle circuit in multi-select
+ * - "Full Diagram": Always resets to full view (all circuits)
  */
 function CircuitTabsComponent({
   circuits,
-  activeView,
-  onViewChange,
+  selectedCircuits,
+  onSelectionChange,
   modifiedViews = new Set(),
 }: CircuitTabsProps) {
+  const isFullView = selectedCircuits.size === 0;
+
+  const handleCircuitClick = useCallback(
+    (circuitId: string, event: React.MouseEvent) => {
+      const isMultiSelect = event.metaKey || event.ctrlKey;
+
+      if (isMultiSelect) {
+        // Toggle circuit in selection
+        const newSelection = new Set(selectedCircuits);
+        if (newSelection.has(circuitId)) {
+          newSelection.delete(circuitId);
+        } else {
+          newSelection.add(circuitId);
+        }
+        onSelectionChange(newSelection);
+      } else {
+        // Single select - replace with just this circuit
+        onSelectionChange(new Set([circuitId]));
+      }
+    },
+    [selectedCircuits, onSelectionChange]
+  );
+
+  const handleFullDiagramClick = useCallback(() => {
+    // Reset to full view (empty selection = all circuits)
+    onSelectionChange(new Set());
+  }, [onSelectionChange]);
+
   return (
     <div className="flex-shrink-0 bg-neutral-100 dark:bg-neutral-900 border-b border-neutral-300 dark:border-neutral-700">
       <div className="flex flex-wrap items-center gap-1.5 px-3 py-2">
         {/* Full Diagram Tab */}
         <Tab
           label="Full Diagram"
-          isActive={activeView === "full"}
-          onClick={() => onViewChange("full")}
+          isActive={isFullView}
+          onClick={handleFullDiagramClick}
           isModified={modifiedViews.has("full")}
         />
 
@@ -44,11 +79,21 @@ function CircuitTabsComponent({
             key={circuit.id}
             label={circuit.name}
             color={circuit.color}
-            isActive={activeView === circuit.id}
-            onClick={() => onViewChange(circuit.id)}
+            isActive={selectedCircuits.has(circuit.id)}
+            onClick={(e) => handleCircuitClick(circuit.id, e)}
             isModified={modifiedViews.has(circuit.id)}
           />
         ))}
+
+        {/* Multi-select hint */}
+        {selectedCircuits.size > 1 && (
+          <>
+            <div className="w-px h-5 bg-neutral-300 dark:bg-neutral-600 mx-1 flex-shrink-0" />
+            <span className="text-[10px] text-neutral-500 dark:text-neutral-400 px-1">
+              {selectedCircuits.size} circuits
+            </span>
+          </>
+        )}
       </div>
     </div>
   );
@@ -58,14 +103,14 @@ interface TabProps {
   label: string;
   color?: string;
   isActive: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent) => void;
   isModified?: boolean;
 }
 
 function Tab({ label, color, isActive, onClick, isModified }: TabProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => onClick(e)}
       className={cn(
         "flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full transition-colors",
         "border",

@@ -151,18 +151,22 @@ function WiringDiagramInner({
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
   const [isLayouting, setIsLayouting] = useState(false);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
-  const [activeView, setActiveView] = useState<ViewId>("full");
+  // Selected circuits - empty set means "full view" (all circuits visible)
+  const [selectedCircuits, setSelectedCircuits] = useState<Set<string>>(new Set());
   // Per-view positions: each circuit view can have its own component layout
   const [viewPositions, setViewPositions] = useState<Record<ViewId, Record<string, DiagramPosition>>>({});
   const { fitView } = useReactFlow();
 
-  // Get components relevant to the active view
+  // Determine if we're in circuit view mode (any circuits selected)
+  const isInCircuitView = selectedCircuits.size > 0;
+
+  // Get components relevant to the selected circuits
   const viewRelevantComponents = useMemo(() => {
-    if (activeView === "full") {
+    if (!isInCircuitView) {
       return new Set(data.components.map((c) => c.id)); // All components
     }
-    return getRelevantComponents(data, [activeView]);
-  }, [activeView, data]);
+    return getRelevantComponents(data, Array.from(selectedCircuits));
+  }, [isInCircuitView, selectedCircuits, data]);
 
   // Print capture hook
   const { getDiagramBounds } = usePrintCapture();
@@ -207,13 +211,11 @@ function WiringDiagramInner({
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  // Update node and edge visibility based on active view and highlighted circuits
+  // Update node and edge visibility based on selected circuits and highlighted circuits
   useEffect(() => {
-    const isInCircuitView = activeView !== "full";
-
     setNodes((currentNodes) =>
       currentNodes.map((node) => {
-        // In circuit view: hide components not in the active circuit
+        // In circuit view: hide components not in the selected circuits
         const isInActiveView = viewRelevantComponents.has(node.id);
 
         return {
@@ -233,9 +235,9 @@ function WiringDiagramInner({
     let circuitWireTotal = 0;
 
     if (isInCircuitView) {
-      // Get wires in this circuit, sorted for consistent ordering
+      // Get wires in selected circuits, sorted for consistent ordering
       const circuitWires = data.wires
-        .filter((w) => w.circuitId === activeView)
+        .filter((w) => w.circuitId && selectedCircuits.has(w.circuitId))
         .sort((a, b) => a.id.localeCompare(b.id));
 
       circuitWireIndices = new Map<string, number>();
@@ -250,10 +252,10 @@ function WiringDiagramInner({
         // Find the wire data for this edge
         const wire = data.wires.find((w) => w.id === edge.id);
 
-        // In circuit view: only show wires for the active circuit
-        const isInActiveCircuit =
+        // In circuit view: only show wires for selected circuits
+        const isInSelectedCircuits =
           !isInCircuitView ||
-          (wire?.circuitId && wire.circuitId === activeView);
+          (wire?.circuitId && selectedCircuits.has(wire.circuitId));
 
         // Additional filtering from sidebar (highlightedCircuits)
         const isHighlighted =
@@ -272,17 +274,17 @@ function WiringDiagramInner({
 
         return {
           ...edge,
-          hidden: !isInActiveCircuit,
+          hidden: !isInSelectedCircuits,
           data: updatedData,
           style: {
             ...edge.style,
-            opacity: isInActiveCircuit && isHighlighted ? 1 : 0.15,
+            opacity: isInSelectedCircuits && isHighlighted ? 1 : 0.15,
           },
-          animated: Boolean(isHighlighted && isFiltering && isInActiveCircuit),
+          animated: Boolean(isHighlighted && isFiltering && isInSelectedCircuits),
         };
       })
     );
-  }, [activeView, viewRelevantComponents, isFiltering, relevantComponents, highlightedCircuits, data.wires, setNodes, setEdges]);
+  }, [isInCircuitView, selectedCircuits, viewRelevantComponents, isFiltering, relevantComponents, highlightedCircuits, data.wires, setNodes, setEdges]);
 
   // Run auto-layout (ignoring saved positions to recalculate)
   const runAutoLayout = useCallback(async () => {
@@ -503,21 +505,29 @@ function WiringDiagramInner({
     [setNodes]
   );
 
-  // Handle view (tab) change - save current positions and load new view's positions
-  const handleViewChange = useCallback(
-    (newView: ViewId) => {
+  // Handle circuit selection change
+  const handleSelectionChange = useCallback(
+    (newSelection: Set<string>) => {
+      // Create a view key for position saving (sorted circuit IDs or "full")
+      const currentViewKey = selectedCircuits.size === 0
+        ? "full"
+        : Array.from(selectedCircuits).sort().join(",");
+      const newViewKey = newSelection.size === 0
+        ? "full"
+        : Array.from(newSelection).sort().join(",");
+
       // Save current positions for the current view
       const currentPositions = extractPositions(nodes);
       setViewPositions((prev) => ({
         ...prev,
-        [activeView]: currentPositions,
+        [currentViewKey]: currentPositions,
       }));
 
-      // Switch to the new view
-      setActiveView(newView);
+      // Switch to the new selection
+      setSelectedCircuits(newSelection);
 
       // Load saved positions for the new view if they exist
-      const savedPositions = viewPositions[newView];
+      const savedPositions = viewPositions[newViewKey];
       if (savedPositions && Object.keys(savedPositions).length > 0) {
         setNodes((currentNodes) =>
           currentNodes.map((node) => ({
@@ -532,7 +542,7 @@ function WiringDiagramInner({
         fitView({ padding: 0.2, duration: 300 });
       }, 50);
     },
-    [nodes, activeView, viewPositions, setNodes, fitView]
+    [nodes, selectedCircuits, viewPositions, setNodes, fitView]
   );
 
   // Track which views have been modified (have saved positions)
@@ -552,8 +562,8 @@ function WiringDiagramInner({
       {data.circuits.length > 0 && (
         <CircuitTabs
           circuits={data.circuits}
-          activeView={activeView}
-          onViewChange={handleViewChange}
+          selectedCircuits={selectedCircuits}
+          onSelectionChange={handleSelectionChange}
           modifiedViews={modifiedViews}
         />
       )}
