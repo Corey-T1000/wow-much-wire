@@ -17,6 +17,9 @@ interface WireEdgeData {
   sourceComponentTotal?: number;
   targetPinIndex?: number;
   targetPinTotal?: number;
+  // Global wire index for corridor spreading - prevents overlaps
+  globalWireIndex?: number;
+  globalWireTotal?: number;
 }
 
 interface BoundingBox {
@@ -142,22 +145,18 @@ function buildOrthogonalPath(
     return `M ${sourceX} ${sourceY} L ${targetX} ${targetY}`;
   }
 
-  const isSplice = (edgeData?.spliceTotal || 1) > 1;
-  const sourceComponentIndex = edgeData?.sourceComponentIndex || 0;
-  const targetPinIndex = edgeData?.targetPinIndex || 0;
+  const globalWireIndex = edgeData?.globalWireIndex || 0;
   const goingDown = targetY > sourceY;
 
-  // Calculate the vertical corridor X position
-  // Wires from the same component spread slightly, splices share a corridor
-  // IMPORTANT: Also spread based on target pin index to prevent wires to same component from overlapping
-  let corridorX = isSplice
-    ? sourceX - SPLICE_OFFSET
-    : sourceX - SPLICE_OFFSET - (sourceComponentIndex * WIRE_SPREAD);
+  // Calculate the vertical corridor X position using GLOBAL wire index
+  // This ensures every wire gets a unique corridor position, preventing overlaps
+  // Wires are pre-sorted by circuit, so same-colored wires stay together
+  const baseCorridorX = sourceX - SPLICE_OFFSET;
 
-  // Additional spread based on target pin index - each wire to a different pin
-  // on the same target component gets its own corridor
-  // This is the key fix for the overlapping wire problem
-  corridorX -= (targetPinIndex * WIRE_SPREAD);
+  // Each wire gets its own lane based on global index
+  // Use smaller spread (4px) since we're spreading ALL wires now
+  const GLOBAL_SPREAD = 4;
+  let corridorX = baseCorridorX - (globalWireIndex * GLOBAL_SPREAD);
 
   // Push corridor left if it would collide with any component
   corridorX = findClearVerticalX(corridorX, sourceY, targetY, nodeBoundingBoxes);

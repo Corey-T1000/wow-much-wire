@@ -532,6 +532,17 @@ export async function calculateAutoLayout(
   const wireIndexInSplice = new Map<string, number>();
   const wireIndexInSourceComponent = new Map<string, number>();
 
+  // ==========================================================================
+  // GLOBAL WIRE INDEX - Key fix for wire overlap
+  // Assign each wire a unique global index for corridor spreading
+  // Wires are sorted by circuit so same-colored wires stay together
+  // ==========================================================================
+  const globalWireIndex = new Map<string, number>();
+  sortedWires.forEach((wire, index) => {
+    globalWireIndex.set(wire.id, index);
+  });
+  const globalWireTotal = sortedWires.length;
+
   // Create edges with smart handle selection
   const layoutedEdges: Edge[] = componentWires.map((wire) => {
     const sourceNodeId = findComponentIdForPin(data.components, wire.sourcePinId);
@@ -582,6 +593,9 @@ export async function calculateAutoLayout(
         // Target-side spreading (wires to same component get different corridors)
         targetPinIndex,
         targetPinTotal,
+        // GLOBAL wire index for corridor spreading - prevents overlaps
+        globalWireIndex: globalWireIndex.get(wire.id) || 0,
+        globalWireTotal,
       },
       style: {
         stroke: signalGround

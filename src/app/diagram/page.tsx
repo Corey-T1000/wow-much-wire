@@ -285,17 +285,7 @@ export default function DiagramPage() {
           isSharing={isSharing}
         />
 
-        {/* Header overlay - responsive title */}
-        <div className="absolute top-4 left-4 pointer-events-none max-w-[calc(100%-120px)] md:max-w-none">
-          <div className="pointer-events-auto">
-            <h1 className="text-base md:text-xl font-bold text-neutral-900 dark:text-white truncate">
-              1993 NA Miata - Wiring Diagram
-            </h1>
-            <p className="text-xs md:text-sm text-neutral-500 dark:text-white/60 hidden sm:block">
-              Full rewire with Bussmann PDM & MS3Pro Mini
-            </p>
-          </div>
-        </div>
+        {/* Header removed - circuit tabs provide navigation context */}
 
         {/* Mobile bottom bar */}
         <div className="absolute bottom-0 left-0 right-0 md:hidden bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-200 dark:border-neutral-800 p-2 safe-area-pb">
