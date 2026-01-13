@@ -2110,4 +2110,20 @@ export const sampleDiagramData: DiagramData = {
     { id: "wire-ac-sw-pwr", sourcePinId: "ign-run", targetPinId: "ac-sw-in", color: "BU", gauge: "18 AWG", circuitId: "circuit-ac", isInstalled: false },
     { id: "wire-ac-sw-to-press", sourcePinId: "ac-sw-out", targetPinId: "ac-press-in", color: "BU", gauge: "18 AWG", circuitId: "circuit-ac", isInstalled: false },
   ],
+
+  // ===========================================
+  // JUNCTIONS - Explicit wire splice/distribution points
+  // ===========================================
+  junctions: [
+    // Example: Tail/marker distribution - one feed from relay splits to multiple lights
+    // Note: Most junctions will be auto-generated via migration from implicit splices
+    // This is a manual example for testing
+    {
+      id: "junction-tail-dist",
+      type: "splice",
+      label: "Tail Light Distribution",
+      isInstalled: false,
+      notes: "Distributes tail relay output to multiple tail/marker lights",
+    },
+  ],
 };

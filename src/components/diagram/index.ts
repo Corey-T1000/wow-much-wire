@@ -1,5 +1,6 @@
 export { WiringDiagram } from "./wiring-diagram";
 export { ComponentNode } from "./component-node";
+export { JunctionNode } from "./junction-node";
 export { HistoryPanel } from "./history-panel";
 export { SaveDialog } from "./save-dialog";
 export { CircuitFilter } from "./circuit-filter";
@@ -7,4 +8,6 @@ export { SearchCommand } from "./search-command";
 export { PinDiagram } from "./pin-diagram";
 export { NotesPanel } from "./notes-panel";
 export { WiringTips } from "./wiring-tips";
+export { HarnessEdge } from "./harness-edge";
+export { createHarnessBundles, type HarnessBundleInfo } from "./auto-layout";
 export * from "./types";

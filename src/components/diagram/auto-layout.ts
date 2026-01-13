@@ -1,8 +1,37 @@
 import ELK, { type ElkNode, type ElkExtendedEdge } from "elkjs/lib/elk.bundled.js";
-import type { DiagramData, ComponentNodeData, DiagramComponent } from "./types";
+import type { DiagramData, ComponentNodeData, DiagramComponent, DiagramWire, JunctionNodeData } from "./types";
 import type { Node, Edge } from "@xyflow/react";
 
 const elk = new ELK();
+
+// =============================================================================
+// WIRE ENDPOINT HELPERS
+// Handle wires that can connect to either pins or junctions
+// =============================================================================
+
+/**
+ * Get the effective source pin ID for a wire.
+ * For now, returns sourcePinId if present. Junction support will be added later.
+ */
+function getWireSourcePinId(wire: DiagramWire): string | undefined {
+  return wire.sourcePinId;
+}
+
+/**
+ * Get the effective target pin ID for a wire.
+ * For now, returns targetPinId if present. Junction support will be added later.
+ */
+function getWireTargetPinId(wire: DiagramWire): string | undefined {
+  return wire.targetPinId;
+}
+
+/**
+ * Check if a wire connects to component pins (vs junctions).
+ * Used to filter wires for component-only layout operations.
+ */
+function isComponentWire(wire: DiagramWire): boolean {
+  return wire.sourcePinId !== undefined && wire.targetPinId !== undefined;
+}
 
 // =============================================================================
 // COMPONENT ROLE CLASSIFICATION
@@ -65,7 +94,9 @@ function getCircuitPriority(component: DiagramComponent, data: DiagramData): num
   // Check wires to find circuit involvement
   const involvedCircuits = new Set<string>();
   for (const wire of data.wires) {
-    if (componentPins.has(wire.sourcePinId) || componentPins.has(wire.targetPinId)) {
+    const sourcePinId = getWireSourcePinId(wire);
+    const targetPinId = getWireTargetPinId(wire);
+    if ((sourcePinId && componentPins.has(sourcePinId)) || (targetPinId && componentPins.has(targetPinId))) {
       if (wire.circuitId) {
         involvedCircuits.add(wire.circuitId);
       }
@@ -161,6 +192,13 @@ const layoutOptions = {
   "elk.layered.interactiveReferencePoint": "CENTER",
 };
 
+// Return type for layout calculation
+export interface LayoutResult {
+  componentNodes: Node<ComponentNodeData>[];
+  junctionNodes: Node<JunctionNodeData>[];
+  edges: Edge[];
+}
+
 /**
  * Calculate automatic layout for the diagram using ELK
  * Optimized for schematic clarity: minimizes crossings and groups by circuit
@@ -168,7 +206,16 @@ const layoutOptions = {
 export async function calculateAutoLayout(
   data: DiagramData,
   existingNodes: Node<ComponentNodeData>[]
-): Promise<{ nodes: Node<ComponentNodeData>[]; edges: Edge[] }> {
+): Promise<{ nodes: Node<ComponentNodeData>[]; edges: Edge[]; junctionNodes: Node<JunctionNodeData>[] }> {
+  // Filter to only component-to-component wires (not junction wires)
+  // Junction wires will be handled separately once junction nodes are implemented
+  const componentWires = data.wires.filter(isComponentWire) as Array<
+    DiagramWire & { sourcePinId: string; targetPinId: string }
+  >;
+
+  // Get junctions (default to empty array if not present)
+  const junctions = data.junctions || [];
+
   // ==========================================================================
   // STEP 1: Classify and sort components for optimal layout
   // ==========================================================================
@@ -251,12 +298,13 @@ export async function calculateAutoLayout(
   };
 
   // Sort wires by circuit so same-colored wires are routed together
-  const sortedWires = [...data.wires].sort((a, b) => {
+  const sortedWires = [...componentWires].sort((a, b) => {
     const priorityA = a.circuitId ? (circuitPriority[a.circuitId] ?? 50) : 50;
     const priorityB = b.circuitId ? (circuitPriority[b.circuitId] ?? 50) : 50;
     return priorityA - priorityB;
   });
 
+  // ELK edges for component-to-component wires
   const elkEdges: ElkExtendedEdge[] = sortedWires.map((wire, index) => {
     const sourceNode = findComponentIdForPin(data.components, wire.sourcePinId);
     const targetNode = findComponentIdForPin(data.components, wire.targetPinId);
@@ -271,11 +319,69 @@ export async function calculateAutoLayout(
     };
   });
 
+  // ==========================================================================
+  // STEP 3.5: Add junction nodes and junction wire edges to ELK graph
+  // ==========================================================================
+
+  // Identify junction wires:
+  // - Trunk wires: pin → junction (sourcePinId defined, targetJunctionId defined)
+  // - Branch wires: junction → pin (sourceJunctionId defined, targetPinId defined)
+  const trunkWires = data.wires.filter(
+    (w) => w.sourcePinId !== undefined && w.targetJunctionId !== undefined
+  );
+  const branchWires = data.wires.filter(
+    (w) => w.sourceJunctionId !== undefined && w.targetPinId !== undefined
+  );
+
+  // Add ELK edges for trunk wires (pin → junction)
+  const trunkElkEdges: ElkExtendedEdge[] = trunkWires.map((wire) => {
+    const sourceNode = findComponentIdForPin(data.components, wire.sourcePinId!);
+    return {
+      id: wire.id,
+      sources: [sourceNode],
+      targets: [wire.targetJunctionId!],
+      layoutOptions: {
+        "elk.priority": "50", // Lower priority than main wires
+      },
+    };
+  });
+
+  // Add ELK edges for branch wires (junction → pin)
+  const branchElkEdges: ElkExtendedEdge[] = branchWires.map((wire) => {
+    const targetNode = findComponentIdForPin(data.components, wire.targetPinId!);
+    return {
+      id: wire.id,
+      sources: [wire.sourceJunctionId!],
+      targets: [targetNode],
+      layoutOptions: {
+        "elk.priority": "50", // Lower priority than main wires
+      },
+    };
+  });
+  const junctionElkNodes: ElkNode[] = junctions.map((junction) => {
+    // Junction nodes are small - just need space for the dog icon
+    return {
+      id: junction.id,
+      width: 60,
+      height: 60,
+      // Junctions get ports for trunk (input) and branches (output)
+      ports: [
+        { id: `${junction.id}-trunk`, properties: { "port.side": "WEST" } },
+        { id: `${junction.id}-branch-0`, properties: { "port.side": "EAST" } },
+      ],
+      layoutOptions: {
+        // Place junctions in the middle layers
+        "elk.position": "(0, 0)",
+      },
+    };
+  });
+
   const elkGraph: ElkNode = {
     id: "root",
     layoutOptions,
-    children: elkNodes,
-    edges: elkEdges,
+    children: [...elkNodes, ...junctionElkNodes],
+    // Include all wire types: component-to-component, trunk, and branch
+    edges: [...elkEdges, ...trunkElkEdges, ...branchElkEdges],
   };
 
   // Run ELK layout
@@ -284,9 +390,10 @@ export async function calculateAutoLayout(
   // Create circuit color map
   const circuitColorMap = new Map(data.circuits.map((c) => [c.id, c.color]));
 
-  // Apply ELK positions to nodes
-  const layoutedNodes: Node<ComponentNodeData>[] = (layoutedGraph.children || []).map(
-    (elkNode) => {
+  // Apply ELK positions to component nodes
+  const layoutedComponentNodes: Node<ComponentNodeData>[] = (layoutedGraph.children || [])
+    .filter((elkNode) => data.components.some((c) => c.id === elkNode.id))
+    .map((elkNode) => {
       const existingNode = existingNodes.find((n) => n.id === elkNode.id);
       const component = data.components.find((c) => c.id === elkNode.id);
       return {
@@ -301,20 +408,67 @@ export async function calculateAutoLayout(
           isSelected: false,
         },
       };
-    }
-  );
+    });
+
+  // Apply ELK positions to junction nodes
+  const layoutedJunctionNodes: Node<JunctionNodeData>[] = (layoutedGraph.children || [])
+    .filter((elkNode) => junctions.some((j) => j.id === elkNode.id))
+    .map((elkNode) => {
+      const junction = junctions.find((j) => j.id === elkNode.id)!;
+
+      // Count trunk and branch wires for this junction
+      const trunkWires = data.wires.filter((w) => w.targetJunctionId === junction.id);
+      const branchWires = data.wires.filter((w) => w.sourceJunctionId === junction.id);
+
+      // Get circuit colors from connected wires
+      const circuitColors = [...trunkWires, ...branchWires]
+        .map((w) => w.circuitId ? circuitColorMap.get(w.circuitId) : null)
+        .filter((c): c is string => c !== null);
+
+      // Get thickest gauge from trunk wires
+      const trunkGauge = trunkWires.reduce<string | undefined>((thickest, wire) => {
+        if (!wire.gauge) return thickest;
+        if (!thickest) return wire.gauge;
+        const currentAwg = parseInt(wire.gauge);
+        const thickestAwg = parseInt(thickest);
+        return currentAwg < thickestAwg ? wire.gauge : thickest;
+      }, undefined);
+
+      return {
+        id: elkNode.id,
+        type: "junction",
+        position: {
+          x: elkNode.x || 0,
+          y: elkNode.y || 0,
+        },
+        data: {
+          junction,
+          isSelected: false,
+          trunkCount: trunkWires.length,
+          branchCount: branchWires.length,
+          // Only include trunkGauge if we found one (exactOptionalPropertyTypes compliance)
+          ...(trunkGauge !== undefined && { trunkGauge }),
+          circuitColors: [...new Set(circuitColors)],
+        },
+      };
+    });
+
+  // Combine component and junction nodes for backward compatibility
+  // Note: This casts junction nodes to component nodes for the return type
+  // A future update should change the return type to support both
+  const layoutedNodes = layoutedComponentNodes as Node<ComponentNodeData>[];
 
   // Group wires by source pin to detect splices (wires sharing same source pin)
-  const wiresBySourcePin = new Map<string, typeof data.wires>();
-  for (const wire of data.wires) {
+  const wiresBySourcePin = new Map<string, typeof componentWires>();
+  for (const wire of componentWires) {
     const existing = wiresBySourcePin.get(wire.sourcePinId) || [];
     existing.push(wire);
     wiresBySourcePin.set(wire.sourcePinId, existing);
   }
 
   // Group wires by source COMPONENT for per-component spreading
-  const wiresBySourceComponent = new Map<string, typeof data.wires>();
-  for (const wire of data.wires) {
+  const wiresBySourceComponent = new Map<string, typeof componentWires>();
+  for (const wire of componentWires) {
     const sourceNodeId = findComponentIdForPin(data.components, wire.sourcePinId);
     const existing = wiresBySourceComponent.get(sourceNodeId) || [];
     existing.push(wire);
@@ -325,8 +479,8 @@ export async function calculateAutoLayout(
   // IMPORTANT: Sort wires within each group by target pin Y position
   // This ensures wires to higher pins (smaller Y) get smaller indices,
   // preventing horizontal segment crossings
-  const wiresByTargetComponent = new Map<string, typeof data.wires>();
-  for (const wire of data.wires) {
+  const wiresByTargetComponent = new Map<string, typeof componentWires>();
+  for (const wire of componentWires) {
     const targetNodeId = findComponentIdForPin(data.components, wire.targetPinId);
     const existing = wiresByTargetComponent.get(targetNodeId) || [];
     existing.push(wire);
@@ -379,7 +533,7 @@ export async function calculateAutoLayout(
   const wireIndexInSourceComponent = new Map<string, number>();
 
   // Create edges with smart handle selection
-  const layoutedEdges: Edge[] = data.wires.map((wire) => {
+  const layoutedEdges: Edge[] = componentWires.map((wire) => {
     const sourceNodeId = findComponentIdForPin(data.components, wire.sourcePinId);
     const targetNodeId = findComponentIdForPin(data.components, wire.targetPinId);
 
@@ -448,7 +602,95 @@ export async function calculateAutoLayout(
     };
   });
 
-  return { nodes: layoutedNodes, edges: layoutedEdges };
+  // ==========================================================================
+  // STEP 5: Create edges for junction wires (trunk and branch)
+  // ==========================================================================
+
+  // Trunk wire edges: component pin → junction
+  const trunkWireEdges: Edge[] = trunkWires.map((wire) => {
+    const sourceNodeId = findComponentIdForPin(data.components, wire.sourcePinId!);
+    const sourceHandle = `${wire.sourcePinId}-out`;
+    const targetHandle = `${wire.targetJunctionId}-trunk`;
+
+    return {
+      id: wire.id,
+      type: "wire",
+      source: sourceNodeId,
+      target: wire.targetJunctionId!,
+      sourceHandle,
+      targetHandle,
+      data: {
+        spliceIndex: 0,
+        spliceTotal: 1,
+        sourceComponentIndex: 0,
+        sourceComponentTotal: 1,
+        targetPinIndex: 0,
+        targetPinTotal: 1,
+        isJunctionWire: true,
+        isTrunk: true,
+      },
+      style: {
+        stroke: wire.circuitId
+          ? circuitColorMap.get(wire.circuitId) || "#6b7280"
+          : "#6b7280",
+        strokeWidth: getStrokeWidth(wire.gauge),
+      },
+      markerEnd: {
+        type: "arrowclosed" as const,
+        width: 12,
+        height: 12,
+      },
+    };
+  });
+
+  // Branch wire edges: junction → component pin
+  const branchWireEdges: Edge[] = branchWires.map((wire, index) => {
+    const targetNodeId = findComponentIdForPin(data.components, wire.targetPinId!);
+    // Each branch gets its own handle on the junction
+    const sourceHandle = `${wire.sourceJunctionId}-branch-${index}`;
+    // React Flow expects null for missing handles, not undefined
+    const targetHandle = wire.targetPinId ?? null;
+
+    return {
+      id: wire.id,
+      type: "wire",
+      source: wire.sourceJunctionId!,
+      target: targetNodeId,
+      sourceHandle,
+      targetHandle,
+      data: {
+        spliceIndex: 0,
+        spliceTotal: 1,
+        sourceComponentIndex: index,
+        sourceComponentTotal: branchWires.filter((w) => w.sourceJunctionId === wire.sourceJunctionId).length,
+        targetPinIndex: 0,
+        targetPinTotal: 1,
+        isJunctionWire: true,
+        isBranch: true,
+      },
+      style: {
+        stroke: wire.circuitId
+          ? circuitColorMap.get(wire.circuitId) || "#6b7280"
+          : "#6b7280",
+        strokeWidth: getStrokeWidth(wire.gauge),
+      },
+      markerEnd: {
+        type: "arrowclosed" as const,
+        width: 12,
+        height: 12,
+      },
+    };
+  });
+
+  // Combine all edge types
+  const allEdges = [...layoutedEdges, ...trunkWireEdges, ...branchWireEdges];
+
+  return {
+    nodes: layoutedNodes,
+    edges: allEdges,
+    // Also export junction nodes for consumers that need them
+    junctionNodes: layoutedJunctionNodes,
+  };
 }
 
 function findComponentIdForPin(
@@ -510,4 +752,115 @@ function isSignalGround(wire: DiagramData["wires"][0]): boolean {
   const isSmallGauge = wire.gauge?.includes("20") ?? false;
 
   return isEcuSensorGround || (isGroundCircuit && isSmallGauge);
+}
+
+// =============================================================================
+// HARNESS BUNDLING
+// Groups wires between component pairs into single "harness" edges
+// =============================================================================
+
+export interface HarnessBundleInfo {
+  id: string;
+  sourceComponentId: string;
+  targetComponentId: string;
+  wireIds: string[];
+  wireCount: number;
+  circuitColors: string[];
+}
+
+/**
+ * Create harness bundle edges from individual wire data.
+ * Groups wires by source-target component pair.
+ * Returns both harness edges (for bundled view) and the mapping of which wires are in which bundle.
+ */
+export function createHarnessBundles(
+  data: DiagramData,
+  existingEdges: Edge[],
+  expandedBundles: Set<string> = new Set()
+): { edges: Edge[]; bundles: HarnessBundleInfo[] } {
+  // Filter to only component-to-component wires (not junction wires)
+  const componentWires = data.wires.filter(isComponentWire) as Array<
+    DiagramWire & { sourcePinId: string; targetPinId: string }
+  >;
+
+  // Create circuit color map
+  const circuitColorMap = new Map(data.circuits.map((c) => [c.id, c.color]));
+
+  // Group wires by source-target component pair
+  const bundleMap = new Map<string, typeof componentWires>();
+
+  for (const wire of componentWires) {
+    const sourceComponentId = findComponentIdForPin(data.components, wire.sourcePinId);
+    const targetComponentId = findComponentIdForPin(data.components, wire.targetPinId);
+
+    // Create a consistent key regardless of direction
+    // Always use alphabetically first component as the "source" for the key
+    const [comp1, comp2] = [sourceComponentId, targetComponentId].sort();
+    const bundleKey = `${comp1}--${comp2}`;
+
+    const existing = bundleMap.get(bundleKey) || [];
+    existing.push(wire);
+    bundleMap.set(bundleKey, existing);
+  }
+
+  // Build bundle info and decide which edges to show
+  const bundles: HarnessBundleInfo[] = [];
+  const resultEdges: Edge[] = [];
+
+  for (const [bundleKey, wires] of bundleMap) {
+    const [comp1, comp2] = bundleKey.split("--");
+    if (!comp1 || !comp2) continue;
+
+    // Get circuit colors for this bundle
+    const colors = wires
+      .map((w) => (w.circuitId ? circuitColorMap.get(w.circuitId) : null))
+      .filter((c): c is string => c !== null && c !== undefined);
+
+    const bundleId = `harness-${bundleKey}`;
+    const wireIds = wires.map((w) => w.id);
+
+    bundles.push({
+      id: bundleId,
+      sourceComponentId: comp1,
+      targetComponentId: comp2,
+      wireIds,
+      wireCount: wires.length,
+      circuitColors: colors,
+    });
+
+    // Check if this bundle is expanded
+    const isExpanded = expandedBundles.has(bundleId);
+
+    if (isExpanded || wires.length === 1) {
+      // Show individual wires - find them in existing edges
+      for (const wire of wires) {
+        const existingEdge = existingEdges.find((e) => e.id === wire.id);
+        if (existingEdge) {
+          resultEdges.push(existingEdge);
+        }
+      }
+    } else {
+      // Show bundled harness edge
+      // Determine actual source/target based on first wire's direction
+      const firstWire = wires[0];
+      if (!firstWire) continue;
+
+      const actualSource = findComponentIdForPin(data.components, firstWire.sourcePinId);
+      const actualTarget = findComponentIdForPin(data.components, firstWire.targetPinId);
+
+      resultEdges.push({
+        id: bundleId,
+        type: "harness",
+        source: actualSource,
+        target: actualTarget,
+        data: {
+          wireCount: wires.length,
+          wireIds,
+          circuitColors: colors,
+        },
+      });
+    }
+  }
+
+  return { edges: resultEdges, bundles };
 }

@@ -22,16 +22,21 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Loader2 } from "lucide-react";
 import { calculateAutoLayout } from "./auto-layout";
+import { CircuitTabs, type ViewId } from "./circuit-tabs";
 import { ComponentNode } from "./component-node";
+import { JunctionNode } from "./junction-node";
 import { DiagramMenu } from "./diagram-menu";
 import { PrintDialog } from "./print/print-dialog";
 import { usePrintCapture } from "./print/use-print-capture";
 import { useUndoRedo } from "./use-undo-redo";
 import { WireEdge } from "./wire-edge";
-import type { DiagramData, DiagramPosition, ComponentNodeData } from "./types";
+import type { DiagramData, DiagramPosition, ComponentNodeData, JunctionNodeData } from "./types";
 
-// Define node type for the diagram
+// Define node types for the diagram
+// DiagramNode is typed as ComponentNodeData for the base state,
+// but junction nodes are merged in after layout calculation
 type DiagramNode = Node<ComponentNodeData>;
+type JunctionNode = Node<JunctionNodeData>;
 
 interface WiringDiagramProps {
   data: DiagramData;
@@ -54,6 +59,7 @@ interface WiringDiagramProps {
 // Register custom node types
 const nodeTypes = {
   component: ComponentNode,
+  junction: JunctionNode,
 } as const;
 
 // Register custom edge types
@@ -145,7 +151,18 @@ function WiringDiagramInner({
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
   const [isLayouting, setIsLayouting] = useState(false);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
+  const [activeView, setActiveView] = useState<ViewId>("full");
+  // Per-view positions: each circuit view can have its own component layout
+  const [viewPositions, setViewPositions] = useState<Record<ViewId, Record<string, DiagramPosition>>>({});
   const { fitView } = useReactFlow();
+
+  // Get components relevant to the active view
+  const viewRelevantComponents = useMemo(() => {
+    if (activeView === "full") {
+      return new Set(data.components.map((c) => c.id)); // All components
+    }
+    return getRelevantComponents(data, [activeView]);
+  }, [activeView, data]);
 
   // Print capture hook
   const { getDiagramBounds } = usePrintCapture();
@@ -190,46 +207,62 @@ function WiringDiagramInner({
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  // Update node and edge dimming when highlighted circuits change
+  // Update node and edge visibility based on active view and highlighted circuits
   useEffect(() => {
+    const isInCircuitView = activeView !== "full";
+
     setNodes((currentNodes) =>
-      currentNodes.map((node) => ({
-        ...node,
-        data: {
-          ...node.data,
-          isDimmed: isFiltering && !relevantComponents.has(node.id),
-        },
-      }))
+      currentNodes.map((node) => {
+        // In circuit view: hide components not in the active circuit
+        const isInActiveView = viewRelevantComponents.has(node.id);
+
+        return {
+          ...node,
+          hidden: isInCircuitView && !isInActiveView,
+          data: {
+            ...node.data,
+            isDimmed: isFiltering && !relevantComponents.has(node.id),
+          },
+        };
+      })
     );
 
     setEdges((currentEdges) =>
       currentEdges.map((edge) => {
         // Find the wire data for this edge
         const wire = data.wires.find((w) => w.id === edge.id);
+
+        // In circuit view: only show wires for the active circuit
+        const isInActiveCircuit =
+          !isInCircuitView ||
+          (wire?.circuitId && wire.circuitId === activeView);
+
+        // Additional filtering from sidebar (highlightedCircuits)
         const isHighlighted =
           !isFiltering ||
           (wire?.circuitId && highlightedCircuits.includes(wire.circuitId));
 
         return {
           ...edge,
+          hidden: !isInActiveCircuit,
           style: {
             ...edge.style,
-            opacity: isHighlighted ? 1 : 0.15,
+            opacity: isInActiveCircuit && isHighlighted ? 1 : 0.15,
           },
-          animated: Boolean(isHighlighted && isFiltering),
+          animated: Boolean(isHighlighted && isFiltering && isInActiveCircuit),
         };
       })
     );
-  }, [isFiltering, relevantComponents, highlightedCircuits, data.wires, setNodes, setEdges]);
+  }, [activeView, viewRelevantComponents, isFiltering, relevantComponents, highlightedCircuits, data.wires, setNodes, setEdges]);
 
   // Run auto-layout (ignoring saved positions to recalculate)
   const runAutoLayout = useCallback(async () => {
     setIsLayouting(true);
     try {
-      const { nodes: layoutedNodes, edges: layoutedEdges } =
+      const { nodes: layoutedNodes, edges: layoutedEdges, junctionNodes } =
         await calculateAutoLayout(data, nodes);
 
-      // Apply pin click handler
+      // Apply pin click handler to component nodes
       const nodesWithHandlers = layoutedNodes.map((node) => ({
         ...node,
         data: {
@@ -238,11 +271,18 @@ function WiringDiagramInner({
         },
       }));
 
-      setNodes(nodesWithHandlers);
+      // Merge junction nodes with component nodes
+      // Junction nodes use a different data type but React Flow handles them via nodeTypes
+      const allNodes = [
+        ...nodesWithHandlers,
+        ...junctionNodes as unknown as DiagramNode[], // Type assertion for state compatibility
+      ];
+
+      setNodes(allNodes);
       setEdges(layoutedEdges);
 
       // Notify parent of new positions and initialize undo/redo history
-      const positions = extractPositions(nodesWithHandlers);
+      const positions = extractPositions(allNodes);
       onPositionsChange?.(positions);
       initializeHistory(positions);
 
@@ -261,20 +301,32 @@ function WiringDiagramInner({
   const applyPositions = useCallback(async (positions: Record<string, DiagramPosition>) => {
     setIsLayouting(true);
     try {
-      // Calculate edges without repositioning nodes
-      const { edges: layoutedEdges } = await calculateAutoLayout(data, nodes);
+      // Calculate edges and junction nodes
+      const { edges: layoutedEdges, junctionNodes } = await calculateAutoLayout(data, nodes);
 
-      // Apply saved positions and pin click handler
-      setNodes((currentNodes) =>
-        currentNodes.map((node) => ({
-          ...node,
-          position: positions[node.id] || node.position,
-          data: {
-            ...node.data,
-            onPinClick: handlePinClick,
-          },
-        }))
-      );
+      // Apply saved positions and pin click handler to current nodes
+      const updatedNodes = nodes.map((node) => ({
+        ...node,
+        position: positions[node.id] || node.position,
+        data: {
+          ...node.data,
+          onPinClick: handlePinClick,
+        },
+      }));
+
+      // Apply saved positions to junction nodes as well
+      const updatedJunctionNodes = junctionNodes.map((jNode) => ({
+        ...jNode,
+        position: positions[jNode.id] || jNode.position,
+      }));
+
+      // Merge all nodes
+      const allNodes = [
+        ...updatedNodes,
+        ...updatedJunctionNodes as unknown as DiagramNode[],
+      ];
+
+      setNodes(allNodes);
       setEdges(layoutedEdges);
 
       // Initialize undo/redo history with loaded positions
@@ -422,9 +474,64 @@ function WiringDiagramInner({
     [setNodes]
   );
 
+  // Handle view (tab) change - save current positions and load new view's positions
+  const handleViewChange = useCallback(
+    (newView: ViewId) => {
+      // Save current positions for the current view
+      const currentPositions = extractPositions(nodes);
+      setViewPositions((prev) => ({
+        ...prev,
+        [activeView]: currentPositions,
+      }));
+
+      // Switch to the new view
+      setActiveView(newView);
+
+      // Load saved positions for the new view if they exist
+      const savedPositions = viewPositions[newView];
+      if (savedPositions && Object.keys(savedPositions).length > 0) {
+        setNodes((currentNodes) =>
+          currentNodes.map((node) => ({
+            ...node,
+            position: savedPositions[node.id] || node.position,
+          }))
+        );
+      }
+
+      // Fit view after switching (with delay to allow state update)
+      setTimeout(() => {
+        fitView({ padding: 0.2, duration: 300 });
+      }, 50);
+    },
+    [nodes, activeView, viewPositions, setNodes, fitView]
+  );
+
+  // Track which views have been modified (have saved positions)
+  const modifiedViews = useMemo(() => {
+    const modified = new Set<ViewId>();
+    for (const [viewId, positions] of Object.entries(viewPositions)) {
+      if (Object.keys(positions).length > 0) {
+        modified.add(viewId);
+      }
+    }
+    return modified;
+  }, [viewPositions]);
+
   return (
-    <div className="h-full w-full bg-neutral-100 dark:bg-neutral-950">
-      <ReactFlow
+    <div className="h-full w-full flex flex-col bg-neutral-100 dark:bg-neutral-950">
+      {/* Circuit View Tabs */}
+      {data.circuits.length > 0 && (
+        <CircuitTabs
+          circuits={data.circuits}
+          activeView={activeView}
+          onViewChange={handleViewChange}
+          modifiedViews={modifiedViews}
+        />
+      )}
+
+      {/* Diagram Area */}
+      <div className="flex-1 relative">
+        <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={handleNodesChange}
@@ -567,6 +674,7 @@ function WiringDiagramInner({
         open={isPrintOpen}
         onOpenChange={setIsPrintOpen}
       />
+      </div>{/* End of flex-1 diagram area wrapper */}
     </div>
   );
 }

@@ -52,10 +52,37 @@ export interface DiagramCircuit {
   category: string;
 }
 
+/**
+ * Junction types for wire splices and distribution points
+ */
+export type JunctionType = "splice" | "distribution" | "tap" | "ground-bus";
+
+/**
+ * A junction represents a physical splice or distribution point where
+ * multiple wires connect. The trunk wire carries the combined load,
+ * and branch wires split off to individual destinations.
+ */
+export interface DiagramJunction {
+  id: string;
+  type: JunctionType;
+  /** Human-readable label (e.g., "Headlight splice", "Main ground bus") */
+  label?: string;
+  /** Position on canvas (can be auto-positioned if not set) */
+  position?: { x: number; y: number };
+  /** Whether this splice has been physically installed */
+  isInstalled: boolean;
+  /** Notes for the builder */
+  notes?: string;
+}
+
 export interface DiagramWire {
   id: string;
-  sourcePinId: string;
-  targetPinId: string;
+  /** Source can be a component pin OR a junction */
+  sourcePinId?: string;
+  sourceJunctionId?: string;
+  /** Target can be a component pin OR a junction */
+  targetPinId?: string;
+  targetJunctionId?: string;
   color: string | null;
   gauge: string | null;
   circuitId: string | null;
@@ -86,6 +113,8 @@ export interface DiagramData {
   components: DiagramComponent[];
   circuits: DiagramCircuit[];
   wires: DiagramWire[];
+  /** Wire junctions (splices, distribution points) */
+  junctions?: DiagramJunction[];
   /** Component positions on the canvas, keyed by component ID */
   positions?: Record<string, DiagramPosition>;
   /** Attachments (notes and photos) for diagram entities */
@@ -99,6 +128,21 @@ export interface ComponentNodeData extends Record<string, unknown> {
   isSelected: boolean;
   isDimmed?: boolean;
   onPinClick?: ((pinId: string) => void) | undefined;
+}
+
+// Junction node data for React Flow
+export interface JunctionNodeData extends Record<string, unknown> {
+  junction: DiagramJunction;
+  isSelected: boolean;
+  isDimmed?: boolean;
+  /** Number of wires entering this junction (trunk side) */
+  trunkCount: number;
+  /** Number of wires leaving this junction (branch side) */
+  branchCount: number;
+  /** Thickest gauge entering (for visual sizing) */
+  trunkGauge?: string;
+  /** Circuit colors passing through this junction */
+  circuitColors: string[];
 }
 
 // Component type styling configuration

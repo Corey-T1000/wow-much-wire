@@ -79,8 +79,9 @@ export function SearchCommand({
       }
     }
 
-    // Index wires
+    // Index wires (only component-to-component wires, not junction wires)
     for (const wire of data.wires) {
+      if (!wire.sourcePinId || !wire.targetPinId) continue;
       const sourceComponent = findComponentForPin(data.components, wire.sourcePinId);
       const targetComponent = findComponentForPin(data.components, wire.targetPinId);
       const circuit = wire.circuitId

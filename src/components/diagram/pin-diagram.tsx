@@ -49,15 +49,15 @@ export function PinDiagram({
           ? data.circuits.find((c) => c.id === wire.circuitId)
           : null;
 
-        // Find the other end of the wire
+        // Find the other end of the wire (may be undefined if connected to junction)
         const otherPinId = wire.sourcePinId === pin.id ? wire.targetPinId : wire.sourcePinId;
-        const otherComponent = findComponentForPin(data.components, otherPinId);
+        const otherComponent = otherPinId ? findComponentForPin(data.components, otherPinId) : null;
 
         connections.set(pin.id, {
           connected: true,
           circuitColor: circuit?.color,
           circuitName: circuit?.name,
-          targetName: otherComponent?.name,
+          targetName: otherComponent?.name || (wire.targetJunctionId ? "Junction" : undefined),
           gauge: wire.gauge || undefined,
         });
       } else {
