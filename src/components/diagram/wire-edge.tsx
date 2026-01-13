@@ -30,11 +30,12 @@ interface BoundingBox {
 }
 
 /**
- * Get bounding boxes for all nodes with padding
+ * Get bounding boxes for visible nodes with padding
+ * Excludes hidden nodes to prevent collision detection with other circuits' components
  */
 function getNodeBoundingBoxes(nodes: Node[], excludeIds: string[]): BoundingBox[] {
   return nodes
-    .filter(node => !excludeIds.includes(node.id))
+    .filter(node => !excludeIds.includes(node.id) && !node.hidden)
     .map(node => {
       const width = 300;
       const height = node.measured?.height || 200;

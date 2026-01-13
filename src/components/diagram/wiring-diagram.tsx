@@ -227,6 +227,24 @@ function WiringDiagramInner({
       })
     );
 
+    // Calculate circuit-specific wire indices when in circuit view
+    // This prevents wires from spreading far left based on their full-diagram index
+    let circuitWireIndices: Map<string, number> | null = null;
+    let circuitWireTotal = 0;
+
+    if (isInCircuitView) {
+      // Get wires in this circuit, sorted for consistent ordering
+      const circuitWires = data.wires
+        .filter((w) => w.circuitId === activeView)
+        .sort((a, b) => a.id.localeCompare(b.id));
+
+      circuitWireIndices = new Map<string, number>();
+      circuitWires.forEach((wire, index) => {
+        circuitWireIndices!.set(wire.id, index);
+      });
+      circuitWireTotal = circuitWires.length;
+    }
+
     setEdges((currentEdges) =>
       currentEdges.map((edge) => {
         // Find the wire data for this edge
@@ -242,9 +260,20 @@ function WiringDiagramInner({
           !isFiltering ||
           (wire?.circuitId && highlightedCircuits.includes(wire.circuitId));
 
+        // In circuit view, override the global index with circuit-specific index
+        const edgeData = edge.data as { globalWireIndex?: number; globalWireTotal?: number } | undefined;
+        const updatedData = isInCircuitView && circuitWireIndices
+          ? {
+              ...edgeData,
+              globalWireIndex: circuitWireIndices.get(edge.id) ?? edgeData?.globalWireIndex ?? 0,
+              globalWireTotal: circuitWireTotal,
+            }
+          : edgeData;
+
         return {
           ...edge,
           hidden: !isInActiveCircuit,
+          data: updatedData,
           style: {
             ...edge.style,
             opacity: isInActiveCircuit && isHighlighted ? 1 : 0.15,
