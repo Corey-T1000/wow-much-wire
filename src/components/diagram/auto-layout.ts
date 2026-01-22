@@ -245,7 +245,6 @@ export async function calculateAutoLayout(
 
   const elkNodes: ElkNode[] = sortedComponents.map((component, index) => {
     const size = estimateNodeSize(component);
-    const role = classifyComponentRole(component);
     const circuitPriority = getCircuitPriority(component, data);
 
     // Create ports for each pin - all on left side for consistent wire routing

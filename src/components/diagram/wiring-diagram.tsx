@@ -264,7 +264,7 @@ function WiringDiagramInner({
           (wire?.circuitId && highlightedCircuits.includes(wire.circuitId));
 
         // In circuit view, override the global index with circuit-specific index
-        const edgeData = edge.data as { globalWireIndex?: number; globalWireTotal?: number } | undefined;
+        const edgeData = (edge.data ?? {}) as { globalWireIndex?: number; globalWireTotal?: number };
         const updatedData = isInCircuitView && circuitWireIndices
           ? {
               ...edgeData,
@@ -276,7 +276,7 @@ function WiringDiagramInner({
         return {
           ...edge,
           hidden: !isInSelectedCircuits,
-          data: updatedData,
+          data: updatedData ?? {},
           style: {
             ...edge.style,
             opacity: isInSelectedCircuits && isHighlighted ? 1 : 0.15,
@@ -727,7 +727,7 @@ function WiringDiagramInner({
             hasSavedPositions={hasSavedPositions}
             isLayouting={isLayouting}
             isSharing={isSharing}
-            layoutProgress={layoutProgress}
+            {...(layoutProgress !== undefined && { layoutProgress })}
           />
         </div>
       )}
