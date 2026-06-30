@@ -1,0 +1,13 @@
+# pnpm v11 moved these settings out of package.json's "pnpm" field.
+# https://pnpm.io/settings
+
+overrides:
+  '@types/react': 19.2.5
+  '@types/react-dom': 19.2.3
+
+# Native/postinstall build scripts these deps need (was the unfilled placeholder).
+allowBuilds:
+  esbuild: true
+  msw: true
+  sharp: true
+  unrs-resolver: true
